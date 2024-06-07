@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992611274059",
+    "project_id": "simplepics-5cd71",
+    "storage_bucket": "simplepics-5cd71.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992611274059:android:2fa0935b80c946e2ceacce",
+        "android_client_info": {
+          "package_name": "ch.hartmannsdev.simplepics"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzSnzJ09hEy6QMWQWGG4Fw5hT3IMG2fl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
