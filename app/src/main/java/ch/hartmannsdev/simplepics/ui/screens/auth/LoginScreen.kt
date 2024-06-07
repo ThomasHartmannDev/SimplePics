@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -49,28 +49,17 @@ import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
 import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.components.FilledButton
-import ch.hartmannsdev.simplepics.ui.theme.*
+import ch.hartmannsdev.simplepics.ui.theme.PurpleDark02
+import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
+import ch.hartmannsdev.simplepics.ui.theme.Typography
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import kotlinx.coroutines.launch
 
-fun isEmailValid(email: String): Boolean {
-    return email.contains("@")
-}
-
-fun isPasswordValid(password: String): Boolean {
-    val passwordPattern = Regex("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&+=]).{8,}\$")
-    return passwordPattern.containsMatchIn(password)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
-    val usernameState = remember { mutableStateOf(TextFieldValue()) }
+fun LoginScreen(vm: SimplePicsViewModel?, navController: NavController?) {
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
-    val confirmPasswordState = remember { mutableStateOf(TextFieldValue()) }
     val passwordVisible = remember { mutableStateOf(false) }
-    val confirmPasswordVisible = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val view = LocalView.current
@@ -113,24 +102,9 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
             )
 
             Text(
-                text = "Sign Up",
+                text = "Login",
                 style = Typography.headlineLarge + (TextStyle(fontWeight = FontWeight.Bold)),
                 modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            OutlinedTextField(
-                value = usernameState.value,
-                onValueChange = { usernameState.value = it },
-                label = { Text("Username") },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.AlternateEmail,
-                        contentDescription = "Username Icon"
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, end = 24.dp, start = 24.dp),
             )
 
             OutlinedTextField(
@@ -163,86 +137,50 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
             )
-
-            OutlinedTextField(
-                value = confirmPasswordState.value,
-                onValueChange = { confirmPasswordState.value = it },
-                label = { Row {
-                    Text("Confirm Password")
-                } },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Password,
-                        contentDescription = "Password Icon"
-                    )
-                },
-                visualTransformation = if (confirmPasswordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    TextButton(onClick = { confirmPasswordVisible.value = !confirmPasswordVisible.value }) {
-                        Text(if (confirmPasswordVisible.value) "Hide" else "Show")
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, end = 24.dp, start = 24.dp),
-            )
             Spacer(modifier = Modifier.padding(16.dp))
 
-            FilledButton(text = "Sign up", onClick = {
-                val username = usernameState.value.text
+            FilledButton(text = "Login", onClick = {
                 val email = emailState.value.text
                 val password = passwordState.value.text
-                val confirmPassword = confirmPasswordState.value.text
 
                 when {
-                     username.isEmpty() -> {
-                         scope.launch {
-                             snackbarHostState.showSnackbar("Username cannot be empty")
-                         }
-                     }
+                    password.isEmpty() -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Password cannot be empty")
+                        }
+                    }
+                    email.isEmpty() -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Email cannot be empty")
+                        }
+                    }
 
-                    !isEmailValid(email) -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Invalid email address")
-                        }
-                    }
-                    !isPasswordValid(password) -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Password must contain at least 1 uppercase letter, 1 number, 1 special character and be at least 8 characters long")
-                        }
-                    }
-                    password != confirmPassword -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Passwords do not match")
-                        }
-                    }
                     else -> {
                         scope.launch {
-                            //snackbarHostState.showSnackbar("Signup successful")
-                            vm.onSignUp(username, email, password)
+                            //Todo: Implement sign up
                         }
 
                     }
                 }
             })
 
-            Text("Already a user? Sign in",
+            Text("Don't have an account? Sign up",
                 color = PurpleDark02,
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { navController.navigate(Router.Login.route) }
+                    .clickable { navController?.navigate(Router.Signup.route) }
             )
 
             Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
     }
+
 }
 
-/*@Preview
+@Preview
 @Composable
-private fun SignupScreenPreview() {
+private fun LoginScreenPreview() {
     SimplePicsTheme {
-        SignupScreen(navController = null, vm = null)
+        LoginScreen(vm = null, navController = null)
     }
 }
-*/
