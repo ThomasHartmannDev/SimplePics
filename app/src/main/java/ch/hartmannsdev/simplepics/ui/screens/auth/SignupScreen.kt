@@ -36,10 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -52,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
@@ -111,7 +107,7 @@ fun SignupScreen(navController: NavController?, vm: ViewModel?) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.simplepiclogo_name2),
+                painter = painterResource(id = R.drawable.simplepiclogo_name),
                 contentDescription = "SimplePics Logo",
                 modifier = Modifier
                     .width(200.dp)
@@ -228,7 +224,7 @@ fun SignupScreen(navController: NavController?, vm: ViewModel?) {
                             snackbarHostState.showSnackbar("Signup successful")
                         }
 
-                        //vm.onSignUp(username, email, password)
+                        //vm.onSignup(username, email, password)
                     }
                 }
             })
