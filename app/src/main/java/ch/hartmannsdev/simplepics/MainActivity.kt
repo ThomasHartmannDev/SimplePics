@@ -15,6 +15,7 @@ import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.screens.auth.SignupScreen
 import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
+import ch.hartmannsdev.simplepics.utils.NotificationMessage
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,7 +35,7 @@ class MainActivity : ComponentActivity() {
 fun SimplePicsApp(modifier: Modifier = Modifier) {
     val vm = hiltViewModel<SimplePicsViewModel>()
     val navController = rememberNavController()
-
+    NotificationMessage(vm = vm)
     NavHost(navController = navController, startDestination = Router.Signup.route) {
         composable(Router.Signup.route){ SignupScreen(navController = navController, vm = vm) }
     }

@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -44,9 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
@@ -54,6 +50,7 @@ import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
 import ch.hartmannsdev.simplepics.ui.components.FilledButton
 import ch.hartmannsdev.simplepics.ui.theme.*
+import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import kotlinx.coroutines.launch
 
 fun isEmailValid(email: String): Boolean {
@@ -67,7 +64,7 @@ fun isPasswordValid(password: String): Boolean {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignupScreen(navController: NavController?, vm: ViewModel?) {
+fun SignupScreen(navController: NavController?, vm: SimplePicsViewModel) {
     val usernameState = remember { mutableStateOf(TextFieldValue()) }
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
@@ -221,10 +218,10 @@ fun SignupScreen(navController: NavController?, vm: ViewModel?) {
                     }
                     else -> {
                         scope.launch {
-                            snackbarHostState.showSnackbar("Signup successful")
+                            //snackbarHostState.showSnackbar("Signup successful")
+                            vm.onSignUp(username, email, password)
                         }
 
-                        //vm.onSignup(username, email, password)
                     }
                 }
             })
@@ -241,10 +238,11 @@ fun SignupScreen(navController: NavController?, vm: ViewModel?) {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 private fun SignupScreenPreview() {
     SimplePicsTheme {
         SignupScreen(navController = null, vm = null)
     }
 }
+*/
