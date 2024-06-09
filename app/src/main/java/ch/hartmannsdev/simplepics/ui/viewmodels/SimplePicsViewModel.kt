@@ -23,6 +23,7 @@ class SimplePicsViewModel @Inject constructor(
     val userData = mutableStateOf<UserData?>(null)
     val popupNotification = mutableStateOf<Event<String>?>(null)
 
+
     fun onSignUp(username: String ,email: String, password: String) {
         inProgress.value = true
         db.collection(USERS).whereEqualTo("username", username).get()
@@ -35,7 +36,7 @@ class SimplePicsViewModel @Inject constructor(
                         .addOnCompleteListener{task ->
                             if(task.isSuccessful){
                                 signedIn.value = true
-                                //CREATE PROFILE
+                                createOrUpdateProfile(username = username)
                             } else {
                                 handleException(task.exception, "Sign up failed")
                             }
@@ -45,7 +46,69 @@ class SimplePicsViewModel @Inject constructor(
 
             }
             .addOnFailureListener{exception ->
+                handleException(exception, "Something went wrong")
+            }
+    }
 
+    private fun createOrUpdateProfile(
+        name: String? = null,
+        username: String? = null,
+        bio: String? = null,
+        imageUrl: String? = null
+    ) {
+        val uid = auth.currentUser?.uid // uid from the authenticated user!
+        val userData = UserData(
+            userId = uid,
+            name = name?: userData.value?.name,
+            username = username?: userData.value?.username,
+            bio = bio?: userData.value?.bio,
+            imageUrl = imageUrl?: userData.value?.imageUrl,
+            following = userData.value?.following,
+        )
+        uid?.let {uid ->
+            inProgress.value = true
+            db.collection(USERS).document(uid).get()
+                .addOnSuccessListener {
+                    if(it.exists()){
+                        it.reference.update(userData.toMap())
+                            .addOnSuccessListener {
+                                this.userData.value = userData
+                                inProgress.value = false
+                            }
+                            .addOnFailureListener{
+                                handleException(it, "Cannot update user")
+                                inProgress.value = false
+
+                            }
+                    } else {
+                        db.collection(USERS).document(uid).set(userData)
+                        getUserData(uid)
+                        inProgress.value = false
+                    }
+                }
+                .addOnFailureListener{
+                    handleException(it, "Cannot create user")
+                    inProgress.value = false
+                }
+        }
+
+
+
+
+    }
+
+    private fun getUserData(uid: String) {
+        inProgress.value = true
+        db.collection(USERS).document(uid).get()
+            .addOnSuccessListener {
+                userData.value = it.toObject(UserData::class.java)
+                signedIn.value = true
+                inProgress.value = false
+            }
+
+            .addOnFailureListener{
+                handleException(it, "Cannot get user data")
+                inProgress.value = false
             }
     }
 
