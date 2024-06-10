@@ -29,6 +29,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,6 +52,9 @@ import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.components.FilledButton
 import ch.hartmannsdev.simplepics.ui.theme.*
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
+import ch.hartmannsdev.simplepics.utils.CheckSignedIn
+import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
+import ch.hartmannsdev.simplepics.utils.navigateTo
 import kotlinx.coroutines.launch
 
 fun isEmailValid(email: String): Boolean {
@@ -62,9 +66,14 @@ fun isPasswordValid(password: String): Boolean {
     return passwordPattern.containsMatchIn(password)
 }
 
+// SignupScreen
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
+    //Checking if the user is already signed in
+    CheckSignedIn(navControler = navController, vm = vm)
+
     val usernameState = remember { mutableStateOf(TextFieldValue()) }
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
@@ -75,6 +84,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
     val scope = rememberCoroutineScope()
     val view = LocalView.current
     val density = LocalDensity.current
+    val isLoading = vm.inProgress.value
 
     fun getSnackbarPosition(): Float {
         val insets = ViewCompat.getRootWindowInsets(view)
@@ -85,6 +95,16 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
             with(density) { keyboardHeight.toDp().value }
         } else {
             0f
+        }
+    }
+
+    // Observe Snackbar messages
+    val snackbarMessage = vm.snackbarMessage.value?.getContentOrNull()
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(it)
+            }
         }
     }
 
@@ -120,7 +140,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
 
             OutlinedTextField(
                 value = usernameState.value,
-                onValueChange = { usernameState.value = it },
+                onValueChange = {usernameState.value = it.copy(text = it.text.replace(" ", "")) },
                 label = { Text("Username") },
                 leadingIcon = {
                     Icon(
@@ -135,7 +155,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
 
             OutlinedTextField(
                 value = emailState.value,
-                onValueChange = { emailState.value = it },
+                onValueChange = { emailState.value = it.copy(text = it.text.replace(" ", "")) }, // Remove spaces
                 label = { Text("Email") },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email Icon") },
                 modifier = Modifier
@@ -195,11 +215,11 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 val confirmPassword = confirmPasswordState.value.text
 
                 when {
-                     username.isEmpty() -> {
-                         scope.launch {
-                             snackbarHostState.showSnackbar("Username cannot be empty")
-                         }
-                     }
+                    username.isEmpty() -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Username cannot be empty")
+                        }
+                    }
 
                     !isEmailValid(email) -> {
                         scope.launch {
@@ -230,13 +250,17 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 color = PurpleDark02,
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { navController.navigate(Router.Login.route) }
+                    .clickable { navigateTo(navController, Router.Login) }
             )
 
             Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
+        if(isLoading){
+            CommomProgressSpinner()
+        }
     }
 }
+
 
 /*@Preview
 @Composable

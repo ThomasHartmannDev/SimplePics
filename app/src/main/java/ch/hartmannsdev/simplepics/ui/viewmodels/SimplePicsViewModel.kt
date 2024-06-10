@@ -1,3 +1,5 @@
+// Viewmodel
+
 package ch.hartmannsdev.simplepics.ui.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +24,17 @@ class SimplePicsViewModel @Inject constructor(
     val inProgress = mutableStateOf(false)
     val userData = mutableStateOf<UserData?>(null)
     val popupNotification = mutableStateOf<Event<String>?>(null)
+    val snackbarMessage = mutableStateOf<Event<String>?>(null) // Add this line
 
+    // init is called when the ViewModel is created
+    init {
+        //auth.signOut()
+        val currentUser = auth.currentUser
+        signedIn.value = currentUser != null
+        currentUser?.uid?.let {uid ->
+            getUserData(uid)
+        }
+    }
 
     fun onSignUp(username: String ,email: String, password: String) {
         inProgress.value = true
@@ -97,6 +109,30 @@ class SimplePicsViewModel @Inject constructor(
 
     }
 
+    fun onLogin(email: String, password: String){
+        inProgress.value = true
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener {  task ->
+                if(task.isSuccessful){
+                    signedIn.value = true
+                    inProgress.value = false
+                    auth.currentUser?.uid?.let {uid ->
+                        //handleException(customMessage = "Login successful")
+                        getUserData(uid)
+                    }
+                } else {
+                    handleException(task.exception, "Login failed")
+                    inProgress.value = false
+                }
+
+
+            }
+            .addOnFailureListener{exc ->
+                handleException(exc, "Login failed")
+                inProgress.value = false
+            }
+    }
+
     private fun getUserData(uid: String) {
         inProgress.value = true
         db.collection(USERS).document(uid).get()
@@ -104,18 +140,22 @@ class SimplePicsViewModel @Inject constructor(
                 userData.value = it.toObject(UserData::class.java)
                 signedIn.value = true
                 inProgress.value = false
+                snackbarMessage.value = Event("User data retrieved successfully")
             }
 
-            .addOnFailureListener{
-                handleException(it, "Cannot get user data")
+            .addOnFailureListener{exc ->
+                handleException(exc, "Cannot get user data")
                 inProgress.value = false
             }
     }
+
 
     fun handleException(exception: Exception? = null, customMessage: String = "") {
         exception?.printStackTrace()
         val errorMsg = exception?.localizedMessage?: ""
         val message = if(customMessage.isEmpty()) errorMsg else "$customMessage: $errorMsg"
-        popupNotification.value = Event(message)
+        //popupNotification.value = Event(message)
+        snackbarMessage.value = Event(message) // Add this line
     }
 }
+

@@ -28,12 +28,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -53,10 +55,17 @@ import ch.hartmannsdev.simplepics.ui.theme.PurpleDark02
 import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
 import ch.hartmannsdev.simplepics.ui.theme.Typography
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
+import ch.hartmannsdev.simplepics.utils.CheckSignedIn
+import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
+import ch.hartmannsdev.simplepics.utils.navigateTo
 import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(vm: SimplePicsViewModel?, navController: NavController?) {
+fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
+    //Before everything Check if the user is already logged in so we don't waste time on login
+    CheckSignedIn(navControler = navController, vm = vm)
+
+
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
     val passwordVisible = remember { mutableStateOf(false) }
@@ -64,6 +73,8 @@ fun LoginScreen(vm: SimplePicsViewModel?, navController: NavController?) {
     val scope = rememberCoroutineScope()
     val view = LocalView.current
     val density = LocalDensity.current
+    val focus = LocalFocusManager.current
+    val isLoading = vm.inProgress.value
 
     fun getSnackbarPosition(): Float {
         val insets = ViewCompat.getRootWindowInsets(view)
@@ -74,6 +85,16 @@ fun LoginScreen(vm: SimplePicsViewModel?, navController: NavController?) {
             with(density) { keyboardHeight.toDp().value }
         } else {
             0f
+        }
+    }
+
+    // Observe Snackbar messages
+    val snackbarMessage = vm.snackbarMessage.value?.getContentOrNull()
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(it)
+            }
         }
     }
 
@@ -144,22 +165,20 @@ fun LoginScreen(vm: SimplePicsViewModel?, navController: NavController?) {
                 val password = passwordState.value.text
 
                 when {
-                    password.isEmpty() -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Password cannot be empty")
-                        }
-                    }
                     email.isEmpty() -> {
                         scope.launch {
                             snackbarHostState.showSnackbar("Email cannot be empty")
                         }
                     }
+                    password.isEmpty() -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Password cannot be empty")
+                        }
+                    }
 
                     else -> {
-                        scope.launch {
-                            //Todo: Implement sign up
-                        }
-
+                        focus.clearFocus(force = true)
+                        vm.onLogin(email, password)
                     }
                 }
             })
@@ -168,19 +187,21 @@ fun LoginScreen(vm: SimplePicsViewModel?, navController: NavController?) {
                 color = PurpleDark02,
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { navController?.navigate(Router.Signup.route) }
+                    .clickable { navigateTo(navController, Router.Signup) }
             )
 
             Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
+        if (isLoading) {
+            CommomProgressSpinner()
+        }
     }
-
 }
 
 @Preview
 @Composable
 private fun LoginScreenPreview() {
     SimplePicsTheme {
-        LoginScreen(vm = null, navController = null)
+        //LoginScreen(vm = null, navController = null)
     }
 }
