@@ -8,10 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ch.hartmannsdev.simplepics.Router.Router
+import ch.hartmannsdev.simplepics.ui.screens.auth.ForgotPasswordScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.LoginScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.SignupScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.FeedScreen
@@ -43,6 +45,7 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
     NavHost(navController = navController, startDestination = Router.Login.route) {
         composable(Router.Signup.route){ SignupScreen(navController = navController, vm = vm) }
         composable(Router.Login.route){ LoginScreen(navController = navController, vm = vm) }
+        composable(Router.ForgotPassword.route){ ForgotPasswordScreen(navController = navController, vm = vm) }
         composable(Router.Feed.route){ FeedScreen(navController = navController, vm = vm) }
         composable(Router.Search.route){ SearchScreen(navController = navController, vm = vm) }
         composable(Router.MyPosts.route){ MyPostScreen(navController = navController, vm = vm) }

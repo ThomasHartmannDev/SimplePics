@@ -149,6 +149,28 @@ class SimplePicsViewModel @Inject constructor(
             }
     }
 
+    fun signOut(){
+        auth.signOut()
+        signedIn.value = false
+        userData.value = null
+    }
+
+    fun forgotPassword(email: String) {
+        inProgress.value = true
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    inProgress.value = false
+                    snackbarMessage.value = Event("Password reset email sent")
+                } else {
+                    handleException(task.exception, "Password reset failed - Please insert a valid email")
+                }
+            }
+            .addOnFailureListener{
+                handleException(it, "Password reset failed - Please insert a valid email")
+                inProgress.value = false
+            }
+    }
 
     fun handleException(exception: Exception? = null, customMessage: String = "") {
         exception?.printStackTrace()

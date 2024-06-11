@@ -19,8 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -79,7 +82,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
     val confirmPasswordState = remember { mutableStateOf(TextFieldValue()) }
     val passwordVisible = remember { mutableStateOf(false) }
-    val confirmPasswordVisible = remember { mutableStateOf(false) }
+    //val confirmPasswordVisible = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val view = LocalView.current
@@ -175,8 +178,11 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 },
                 visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    TextButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
-                        Text(if (passwordVisible.value) "Hide" else "Show")
+                    IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
+                        val icon = if (passwordVisible.value) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
+                        val description = if (passwordVisible.value) "Hide password" else "Show password"
+                        //Icon(Icons.Filled.Favorite, contentDescription = "Localized description")
+                        Icon(icon, contentDescription = description )
                     }
                 },
                 modifier = Modifier
@@ -196,12 +202,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                         contentDescription = "Password Icon"
                     )
                 },
-                visualTransformation = if (confirmPasswordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    TextButton(onClick = { confirmPasswordVisible.value = !confirmPasswordVisible.value }) {
-                        Text(if (confirmPasswordVisible.value) "Hide" else "Show")
-                    }
-                },
+                visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
@@ -261,12 +262,3 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
     }
 }
 
-
-/*@Preview
-@Composable
-private fun SignupScreenPreview() {
-    SimplePicsTheme {
-        SignupScreen(navController = null, vm = null)
-    }
-}
-*/
