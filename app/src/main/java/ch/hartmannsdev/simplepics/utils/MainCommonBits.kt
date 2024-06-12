@@ -1,30 +1,38 @@
 package ch.hartmannsdev.simplepics.utils
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import ch.hartmannsdev.simplepics.R
 import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.theme.Orange80
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
-
-
-
-
-//composable with Toast in case the snackbar is not working
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 
 
 @Composable
@@ -39,7 +47,7 @@ fun NotificationMessage(vm: SimplePicsViewModel) {
 
 @Composable
 fun CommomProgressSpinner(modifier: Modifier = Modifier) {
-    Row (
+    Row(
         modifier = Modifier
             .alpha(0.5f)
             .background(Orange80)
@@ -47,13 +55,13 @@ fun CommomProgressSpinner(modifier: Modifier = Modifier) {
             .fillMaxSize(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         CircularProgressIndicator()
     }
 }
 
 fun navigateTo(navControler: NavController, dest: Router) {
-    navControler.navigate(dest.route){
+    navControler.navigate(dest.route) {
         popUpTo(dest.route)
         launchSingleTop = true
 
@@ -73,3 +81,60 @@ fun CheckSignedIn(navControler: NavController, vm: SimplePicsViewModel) {
         }
     }
 }
+
+
+/*
+* The CommomImage can be use to multiple thing, this composable is just
+* a imagine loader using Coil.
+* */
+@Composable
+fun CommomImage(
+    data: String?,
+    modifier: Modifier = Modifier.wrapContentSize(),
+    contentScale: ContentScale = ContentScale.Crop,
+) {
+    val painter = rememberAsyncImagePainter(model = data)
+    Image(
+        painter = painter,
+        contentDescription = "User Image",
+        modifier = modifier,
+        contentScale = contentScale
+    )
+
+    if (painter.state is AsyncImagePainter.State.Loading) {
+        CommomProgressSpinner()
+    }
+}
+
+@Composable
+fun UserImageCard(
+    userImage: String?, modifier: Modifier = Modifier
+        .padding(8.dp)
+        .size(64.dp)
+) {
+    Card(shape = CircleShape, modifier = modifier) {
+        if (userImage.isNullOrEmpty()) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_user),
+                contentDescription = "Default User Image",
+                colorFilter = ColorFilter.tint(Color.Gray),
+                contentScale = ContentScale.FillBounds
+            )
+        } else {
+            CommomImage(data = userImage)
+        }
+    }
+}
+
+@Composable
+fun CommomDivider() {
+    HorizontalDivider(
+        Modifier
+            .alpha(0.3f)
+            .padding(8.dp),
+        thickness = 1.dp,
+        color = Color.LightGray,
+    )
+}
+
+

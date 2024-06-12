@@ -7,4 +7,5 @@ sealed class Router(val route: String) {
     object Feed: Router("feed")
     object Search: Router("search")
     object MyPosts: Router("myposts")
+    object Profile: Router("profile")
 }

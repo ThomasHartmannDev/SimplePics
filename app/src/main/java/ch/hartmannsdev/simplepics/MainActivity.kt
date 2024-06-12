@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,6 +18,7 @@ import ch.hartmannsdev.simplepics.ui.screens.auth.SignupScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.FeedScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.MyPostScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.SearchScreen
+import ch.hartmannsdev.simplepics.ui.screens.user.ProfileScreen
 import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.NotificationMessage
@@ -49,6 +49,7 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
         composable(Router.Feed.route){ FeedScreen(navController = navController, vm = vm) }
         composable(Router.Search.route){ SearchScreen(navController = navController, vm = vm) }
         composable(Router.MyPosts.route){ MyPostScreen(navController = navController, vm = vm) }
+        composable(Router.Profile.route){ ProfileScreen(navController = navController, vm = vm) }
     }
 
 }
