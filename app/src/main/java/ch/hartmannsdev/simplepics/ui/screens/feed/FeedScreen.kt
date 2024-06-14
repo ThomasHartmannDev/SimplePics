@@ -12,6 +12,7 @@ import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 
 @Composable
 fun FeedScreen(navController: NavController, vm : SimplePicsViewModel) {
+
     Column(modifier = Modifier.fillMaxSize()){
         Column (modifier = Modifier.weight(1f)){
             Text("Feed Screen")

@@ -32,7 +32,7 @@ fun BottomNavigationMenu(selectedItem: BottomNavigationItem, navController: NavC
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(top = 4.dp)
+            .padding(top = 4.dp, bottom = 20.dp)
             .background(Color.White)
     ) {
         for (item in BottomNavigationItem.values()) {

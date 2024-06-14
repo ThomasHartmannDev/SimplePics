@@ -95,10 +95,11 @@ fun CommomImage(
 ) {
     val painter = rememberAsyncImagePainter(model = data)
     Image(
+        modifier = modifier,
         painter = painter,
         contentDescription = "User Image",
-        modifier = modifier,
         contentScale = contentScale
+
     )
 
     if (painter.state is AsyncImagePainter.State.Loading) {
@@ -118,7 +119,7 @@ fun UserImageCard(
                 painter = painterResource(id = R.drawable.ic_user),
                 contentDescription = "Default User Image",
                 colorFilter = ColorFilter.tint(Color.Gray),
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.Crop
             )
         } else {
             CommomImage(data = userImage)

@@ -2,6 +2,7 @@
 
 package ch.hartmannsdev.simplepics.ui.viewmodels
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import ch.hartmannsdev.simplepics.data.Event
@@ -10,7 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.lang.Exception
+import java.util.UUID
 import javax.inject.Inject
 
 var USERS = "users"
@@ -179,5 +180,47 @@ class SimplePicsViewModel @Inject constructor(
         //popupNotification.value = Event(message)
         snackbarMessage.value = Event(message) // Add this line
     }
+
+
+    fun updateProfileData(
+        name: String? = null,
+        username: String? = null,
+        bio: String? = null,
+    ){
+        createOrUpdateProfile(name, username, bio)
+    }
+
+    private fun uploadImage(uri: Uri, onSucess: (Uri) -> Unit){
+        inProgress.value = true
+
+        val storageRef = storage.reference
+        val uuid = UUID.randomUUID()
+        val imageRef = storageRef.child("images/$uuid")
+        val uploadTask = imageRef.putFile(uri)
+
+        uploadTask
+            .addOnSuccessListener {
+                val result = it.metadata?.reference?.downloadUrl
+                result?.addOnSuccessListener(onSucess)
+
+            }
+            .addOnFailureListener {exc ->
+                handleException(exc, "Cannot upload image")
+                inProgress.value = false
+            }
+    }
+
+    fun uploadProfileImage(uri: Uri){
+        uploadImage(uri){
+            createOrUpdateProfile(imageUrl = it.toString())
+        }
+    }
+
+    fun onLogout(){
+        auth.signOut()
+        signedIn.value = false
+        userData.value = null
+    }
+
 }
 
