@@ -1,5 +1,6 @@
 package ch.hartmannsdev.simplepics.ui.screens.user
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
@@ -19,18 +21,25 @@ import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.components.EditTextField
@@ -66,12 +75,10 @@ fun ProfileScreen(navController: NavController, vm: SimplePicsViewModel) {
                 navController.navigate(Router.Login.route){
                     popUpTo(0)
                 }
-
             }
         )
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileContent(
@@ -134,10 +141,72 @@ fun ProfileContent(
 @Composable
 fun ProfileImage(imageURL: String?, vm: SimplePicsViewModel) {
     val isLoading = vm.inProgress.value
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-    ){uri ->
-        uri?.let { vm.uploadProfileImage(uri) }
+    val showDialog = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { vm.uploadProfileImage(it) }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            vm.cameraImageUri?.let { vm.uploadProfileImage(it) }
+        }
+    }
+
+    if (showDialog.value) {
+        Dialog(onDismissRequest = { showDialog.value = false }) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.surface,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(300.dp)
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = "Choose Image Source",
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                galleryLauncher.launch("image/*")
+                                showDialog.value = false
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text(text = "Gallery", color = MaterialTheme.colorScheme.onPrimary)
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                val uri = vm.createImageUri(context.contentResolver)
+                                vm.cameraImageUri = uri
+                                cameraLauncher.launch(uri)
+                                showDialog.value = false
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text(text = "Camera", color = MaterialTheme.colorScheme.onPrimary)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Box(modifier = Modifier.height(IntrinsicSize.Min)) {
@@ -145,7 +214,7 @@ fun ProfileImage(imageURL: String?, vm: SimplePicsViewModel) {
         Column(modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clickable { launcher.launch("image/*") },
+            .clickable { showDialog.value = true },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Card(shape = CircleShape,
@@ -165,3 +234,4 @@ fun ProfileImage(imageURL: String?, vm: SimplePicsViewModel) {
 
     }
 }
+

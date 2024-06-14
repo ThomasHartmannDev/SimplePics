@@ -30,7 +30,7 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
 
-    Column(modifier = Modifier.fillMaxSize().padding(top = 10.dp)) {
+    Column(modifier = Modifier.fillMaxSize()) {
 
         Column(modifier = Modifier.weight(1f)) {
             Row() {

@@ -2,7 +2,10 @@
 
 package ch.hartmannsdev.simplepics.ui.viewmodels
 
+import android.content.ContentResolver
+import android.content.ContentValues
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import ch.hartmannsdev.simplepics.data.Event
@@ -26,7 +29,7 @@ class SimplePicsViewModel @Inject constructor(
     val userData = mutableStateOf<UserData?>(null)
     val popupNotification = mutableStateOf<Event<String>?>(null)
     val snackbarMessage = mutableStateOf<Event<String>?>(null) // Add this line
-
+    var cameraImageUri: Uri? = null
     // init is called when the ViewModel is created
     init {
         //auth.signOut()
@@ -37,6 +40,13 @@ class SimplePicsViewModel @Inject constructor(
         }
     }
 
+    fun createImageUri(contentResolver: ContentResolver): Uri? {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "new_profile_image.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        }
+        return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+    }
     fun onSignUp(username: String ,email: String, password: String) {
         inProgress.value = true
         db.collection(USERS).whereEqualTo("username", username).get()

@@ -5,11 +5,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -90,7 +90,7 @@ fun CheckSignedIn(navControler: NavController, vm: SimplePicsViewModel) {
 @Composable
 fun CommomImage(
     data: String?,
-    modifier: Modifier = Modifier.wrapContentSize(),
+    modifier: Modifier = Modifier.fillMaxSize(),
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val painter = rememberAsyncImagePainter(model = data)
@@ -99,30 +99,38 @@ fun CommomImage(
         painter = painter,
         contentDescription = "User Image",
         contentScale = contentScale
-
     )
 
     if (painter.state is AsyncImagePainter.State.Loading) {
-        CommomProgressSpinner()
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CommomProgressSpinner()
+        }
     }
 }
 
 @Composable
 fun UserImageCard(
-    userImage: String?, modifier: Modifier = Modifier
+    userImage: String?,
+    modifier: Modifier = Modifier
         .padding(8.dp)
         .size(64.dp)
 ) {
     Card(shape = CircleShape, modifier = modifier) {
-        if (userImage.isNullOrEmpty()) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_user),
-                contentDescription = "Default User Image",
-                colorFilter = ColorFilter.tint(Color.Gray),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            CommomImage(data = userImage)
+        Box(contentAlignment = Alignment.Center) {
+            if (userImage.isNullOrEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_user),
+                    contentDescription = "Default User Image",
+                    colorFilter = ColorFilter.tint(Color.Gray),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                CommomImage(data = userImage)
+            }
         }
     }
 }

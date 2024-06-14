@@ -92,6 +92,10 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation("androidx.compose.material:material-icons-extended")
 
+    //Permission
+    implementation ("com.google.accompanist:accompanist-permissions:0.23.1")
+
+
     //Android auto generated
     implementation ("com.google.accompanist:accompanist-insets:0.23.0")
     implementation("androidx.core:core-ktx:1.9.0")

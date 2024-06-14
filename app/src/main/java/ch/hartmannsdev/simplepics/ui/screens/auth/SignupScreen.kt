@@ -30,7 +30,6 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +52,8 @@ import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
 import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.components.FilledButton
-import ch.hartmannsdev.simplepics.ui.theme.*
+import ch.hartmannsdev.simplepics.ui.theme.PurpleDark02
+import ch.hartmannsdev.simplepics.ui.theme.Typography
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.CheckSignedIn
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
@@ -181,7 +181,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                     IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
                         val icon = if (passwordVisible.value) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                         val description = if (passwordVisible.value) "Hide password" else "Show password"
-                        //Icon(Icons.Filled.Favorite, contentDescription = "Localized description")
+
                         Icon(icon, contentDescription = description )
                     }
                 },

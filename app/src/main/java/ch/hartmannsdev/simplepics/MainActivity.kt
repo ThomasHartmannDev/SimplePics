@@ -18,6 +18,7 @@ import ch.hartmannsdev.simplepics.ui.screens.feed.FeedScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.MyPostScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.SearchScreen
 import ch.hartmannsdev.simplepics.ui.screens.user.ProfileScreen
+
 import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.NotificationMessage
