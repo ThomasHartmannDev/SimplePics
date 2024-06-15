@@ -42,11 +42,12 @@ class SimplePicsViewModel @Inject constructor(
 
     fun createImageUri(contentResolver: ContentResolver): Uri? {
         val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "new_profile_image.jpg")
+            put(MediaStore.Images.Media.DISPLAY_NAME, "new_image.jpg")
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         }
         return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
     }
+
     fun onSignUp(username: String ,email: String, password: String) {
         inProgress.value = true
         db.collection(USERS).whereEqualTo("username", username).get()

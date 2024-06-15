@@ -1,4 +1,5 @@
 package ch.hartmannsdev.simplepics
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,10 +16,10 @@ import ch.hartmannsdev.simplepics.ui.screens.auth.ForgotPasswordScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.LoginScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.SignupScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.FeedScreen
-import ch.hartmannsdev.simplepics.ui.screens.feed.MyPostScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.SearchScreen
+import ch.hartmannsdev.simplepics.ui.screens.user.MyPostScreen
+import ch.hartmannsdev.simplepics.ui.screens.user.NewPostScreen
 import ch.hartmannsdev.simplepics.ui.screens.user.ProfileScreen
-
 import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.NotificationMessage
@@ -42,6 +43,8 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
     val vm = hiltViewModel<SimplePicsViewModel>()
     val navController = rememberNavController()
     NotificationMessage(vm = vm)
+
+    // Here are created every single route we need to change screens on our app
     NavHost(navController = navController, startDestination = Router.Login.route) {
         composable(Router.Signup.route){ SignupScreen(navController = navController, vm = vm) }
         composable(Router.Login.route){ LoginScreen(navController = navController, vm = vm) }
@@ -50,6 +53,14 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
         composable(Router.Search.route){ SearchScreen(navController = navController, vm = vm) }
         composable(Router.MyPosts.route){ MyPostScreen(navController = navController, vm = vm) }
         composable(Router.Profile.route){ ProfileScreen(navController = navController, vm = vm) }
+        composable(Router.NewPost.route){navBackStackEntry ->
+            val imageUri = navBackStackEntry.arguments?.getString("imageUri")
+            imageUri?.let {
+               NewPostScreen(navController = navController, vm = vm,  encodedUri = it)
+            }
+        }
+
+
     }
 
 }

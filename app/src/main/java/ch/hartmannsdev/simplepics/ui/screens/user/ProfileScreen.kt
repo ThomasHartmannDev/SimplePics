@@ -101,6 +101,7 @@ fun ProfileContent(
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
+        Spacer(modifier = Modifier.padding(top = 32.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -193,10 +194,15 @@ fun ProfileImage(imageURL: String?, vm: SimplePicsViewModel) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                val uri = vm.createImageUri(context.contentResolver)
-                                vm.cameraImageUri = uri
-                                cameraLauncher.launch(uri)
-                                showDialog.value = false
+                               try {
+                                   val uri = vm.createImageUri(context.contentResolver)
+                                   vm.cameraImageUri = uri
+                                   cameraLauncher.launch(uri)
+                                   showDialog.value = false
+                               } catch (e: Exception) {
+                                   showDialog.value = false
+                                   vm.handleException(null,"Please allow the app to access the camera")
+                               }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)

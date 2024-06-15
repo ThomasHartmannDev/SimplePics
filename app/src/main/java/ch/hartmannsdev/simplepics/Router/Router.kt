@@ -8,4 +8,7 @@ sealed class Router(val route: String) {
     object Search: Router("search")
     object MyPosts: Router("myposts")
     object Profile: Router("profile")
+    object NewPost: Router("newpost/{imageUri}"){
+        fun createRoute(uri: String) = "newpost/$uri"
+    }
 }
