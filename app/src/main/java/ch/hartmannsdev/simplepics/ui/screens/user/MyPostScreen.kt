@@ -1,6 +1,7 @@
 package ch.hartmannsdev.simplepics.ui.screens.user
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -18,11 +19,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,22 +43,37 @@ import ch.hartmannsdev.simplepics.ui.components.ProfileImage
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import ch.hartmannsdev.simplepics.utils.navigateTo
+import kotlinx.coroutines.launch
 
 @Composable
 fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
     val showDialog = remember { mutableStateOf(false) }
+    val ErrorCam = remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
 
     val newPostImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),){
+        contract = ActivityResultContracts.GetContent()){
         uri: Uri? ->
             uri?.let {
                 val encodedUri = Uri.encode(it.toString())
                 val route = Router.NewPost.createRoute(encodedUri)
                 navController.navigate(route)
             }
+    }
+
+    // Observe Snackbar messages
+    val snackbarMessage = vm.snackbarMessage.value?.getContentOrNull()
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let {
+            scope.launch {
+                snackbarHostState.showSnackbar(it)
+            }
+        }
     }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -81,8 +100,11 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
             }
         }
     }
+
     if (showDialog.value) {
-        Dialog(onDismissRequest = { showDialog.value = false }) {
+        Dialog(onDismissRequest = {
+            showDialog.value = false
+        }) {
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surface,
@@ -116,14 +138,14 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                try {
+                                try{
                                     val uri = vm.createImageUri(context.contentResolver)
                                     vm.cameraImageUri = uri
                                     cameraLauncher.launch(uri)
                                     showDialog.value = false
                                 } catch (e: Exception) {
+                                    vm.handleException(null,"Can't open camera, Allow the camera on the permissions")
                                     showDialog.value = false
-                                    vm.handleException(null,"Please allow the app to access the camera")
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
@@ -136,7 +158,6 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
             }
         }
     }
-
 
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.padding(top = 16.dp))

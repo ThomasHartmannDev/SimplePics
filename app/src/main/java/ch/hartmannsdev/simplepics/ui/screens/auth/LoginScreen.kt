@@ -135,6 +135,7 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -159,6 +160,7 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
+                singleLine = true,
             )
             Row (modifier = Modifier
                 .fillMaxWidth()

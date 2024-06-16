@@ -100,7 +100,6 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
             0f
         }
     }
-
     // Observe Snackbar messages
     val snackbarMessage = vm.snackbarMessage.value?.getContentOrNull()
     LaunchedEffect(snackbarMessage) {
@@ -154,6 +153,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -164,6 +164,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -188,6 +189,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
+                singleLine = true,
             )
 
             OutlinedTextField(
@@ -206,6 +208,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
+                singleLine = true,
             )
             Spacer(modifier = Modifier.padding(16.dp))
 
