@@ -8,21 +8,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import ch.hartmannsdev.simplepics.Router.Router
+import ch.hartmannsdev.simplepics.data.PostData
 import ch.hartmannsdev.simplepics.ui.screens.auth.ForgotPasswordScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.LoginScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.SignupScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.FeedScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.SearchScreen
+import ch.hartmannsdev.simplepics.ui.screens.feed.SinglePostScreen
 import ch.hartmannsdev.simplepics.ui.screens.user.MyPostScreen
 import ch.hartmannsdev.simplepics.ui.screens.user.NewPostScreen
 import ch.hartmannsdev.simplepics.ui.screens.user.ProfileScreen
 import ch.hartmannsdev.simplepics.ui.theme.SimplePicsTheme
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.NotificationMessage
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -59,11 +64,25 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
                NewPostScreen(navController = navController, vm = vm,  encodedUri = it)
             }
         }
+        composable(
+            route = Router.SinglePost.route,
+            arguments = listOf(navArgument("postData") { type = NavType.StringType })
+        ) { navBackStackEntry ->
+            val postDataJson = navBackStackEntry.arguments?.getString("postData")
+            val postData = Gson().fromJson(postDataJson, PostData::class.java)
 
+            postData?.let {
+                SinglePostScreen(
+                    vm = vm, navController = navController, post = it
+                )
+            }
+        }
 
     }
 
 }
+
+
 
 @Preview(showBackground = true)
 @Composable

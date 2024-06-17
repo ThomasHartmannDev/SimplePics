@@ -1,5 +1,6 @@
 package ch.hartmannsdev.simplepics.utils
 
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,7 +61,14 @@ fun CommomProgressSpinner(modifier: Modifier = Modifier) {
     }
 }
 
-fun navigateTo(navControler: NavController, dest: Router) {
+data class NavParam(
+    val name: String,
+    val value: Parcelable
+)
+fun navigateTo(navControler: NavController, dest: Router, vararg params: NavParam) {
+    for (param in params) {
+        navControler.currentBackStackEntry?.arguments?.putParcelable(param.name, param.value)
+    }
     navControler.navigate(dest.route) {
         popUpTo(dest.route)
         launchSingleTop = true
@@ -145,5 +153,3 @@ fun CommomDivider() {
         color = Color.LightGray,
     )
 }
-
-

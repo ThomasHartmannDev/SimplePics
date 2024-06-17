@@ -95,6 +95,8 @@ dependencies {
     //Permission
     implementation ("com.google.accompanist:accompanist-permissions:0.23.1")
 
+    //Gson
+    implementation ("com.google.code.gson:gson:2.8.5")
 
     //Android auto generated
     implementation ("com.google.accompanist:accompanist-insets:0.23.0")

@@ -1,5 +1,9 @@
 package ch.hartmannsdev.simplepics.Router
 
+import android.net.Uri
+import ch.hartmannsdev.simplepics.data.PostData
+import com.google.gson.Gson
+
 sealed class Router(val route: String) {
     object Signup: Router("signUp")
     object Login: Router("login")
@@ -10,5 +14,10 @@ sealed class Router(val route: String) {
     object Profile: Router("profile")
     object NewPost: Router("newpost/{imageUri}"){
         fun createRoute(uri: String) = "newpost/$uri"
+    }
+    object SinglePost : Router("singlepost/{postData}") {
+        fun createRoute(postData: PostData): String {
+            return "singlepost/${Uri.encode(Gson().toJson(postData))}"
+        }
     }
 }

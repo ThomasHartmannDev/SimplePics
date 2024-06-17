@@ -1,9 +1,9 @@
 package ch.hartmannsdev.simplepics.ui.screens.user
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,18 +40,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.Router.Router
+import ch.hartmannsdev.simplepics.data.PostData
+import ch.hartmannsdev.simplepics.data.PostRow
 import ch.hartmannsdev.simplepics.ui.components.BottomNavigationItem
 import ch.hartmannsdev.simplepics.ui.components.BottomNavigationMenu
 import ch.hartmannsdev.simplepics.ui.components.ProfileImage
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
+import ch.hartmannsdev.simplepics.utils.CommomDivider
+import ch.hartmannsdev.simplepics.utils.CommomImage
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import ch.hartmannsdev.simplepics.utils.navigateTo
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
 @Composable
 fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
     val userData = vm.userData.value
     val isLoading = vm.inProgress.value
+    val postLoading = vm.refreshPostsProgress.value
+    val posts = vm.posts.value
     val showDialog = remember { mutableStateOf(false) }
     val ErrorCam = remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -57,13 +67,13 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
 
 
     val newPostImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()){
-        uri: Uri? ->
-            uri?.let {
-                val encodedUri = Uri.encode(it.toString())
-                val route = Router.NewPost.createRoute(encodedUri)
-                navController.navigate(route)
-            }
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val encodedUri = Uri.encode(it.toString())
+            val route = Router.NewPost.createRoute(encodedUri)
+            navController.navigate(route)
+        }
     }
 
     // Observe Snackbar messages
@@ -138,13 +148,16 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                try{
+                                try {
                                     val uri = vm.createImageUri(context.contentResolver)
                                     vm.cameraImageUri = uri
                                     cameraLauncher.launch(uri)
                                     showDialog.value = false
                                 } catch (e: Exception) {
-                                    vm.handleException(null,"Can't open camera, Allow the camera on the permissions")
+                                    vm.handleException(
+                                        null,
+                                        "Can't open camera, Allow the camera on the permissions"
+                                    )
                                     showDialog.value = false
                                 }
                             },
@@ -195,18 +208,36 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
                 Text(text = userData?.bio ?: "")
             }
 
-            OutlinedButton(modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
+            OutlinedButton(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
                 onClick = { navigateTo(navController, Router.Profile) },
                 colors = ButtonDefaults.outlinedButtonColors(Color.Transparent),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp, disabledElevation = 0.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 0.dp,
+                    pressedElevation = 0.dp,
+                    disabledElevation = 0.dp
+                ),
                 shape = RoundedCornerShape(10)
-                ) {
+            ) {
                 Text(text = "Edit Profile", color = Color.Black)
             }
-            Column(modifier = Modifier.weight(1f)){
-                Text("Post List")
+
+            CommomDivider()
+
+            PostList(
+                isContextLoading = isLoading,
+                postsLoading = postLoading,
+                posts = posts,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(1.dp)
+                    .fillMaxWidth(),
+            ) {
+                post ->
+                val postDataJson = Uri.encode(Gson().toJson(post))
+                navController.navigate("singlepost/$postDataJson")
             }
 
         }
@@ -219,4 +250,79 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
         CommomProgressSpinner()
     }
 
+}
+
+@Composable
+fun PostList(
+    isContextLoading: Boolean,
+    postsLoading: Boolean,
+    posts: List<PostData>,
+    modifier: Modifier,
+    onPostClick: (PostData) -> Unit
+) {
+    if (postsLoading) {
+        CommomProgressSpinner()
+    } else if (posts.isEmpty()) {
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (!isContextLoading) {
+                Text(text = "No posts available")
+            }
+        }
+    } else {
+        LazyColumn(modifier = modifier) {
+            val rows = arrayListOf<PostRow>()
+            var currentRow = PostRow()
+            rows.add(currentRow)
+            for (post in posts) {
+                if (currentRow.isFull()) {
+                    currentRow = PostRow()
+                    rows.add(currentRow)
+                }
+                currentRow.add(post)
+            }
+            items(items = rows) { row ->
+                PostsRow(item = row, onPostClick = onPostClick)
+            }
+        }
+    }
+
+}
+
+@Composable
+fun PostsRow(item: PostRow, onPostClick: (PostData) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+    ) {
+        PostImage(imageUrl = item.post1?.postImage, modifier = Modifier
+            .weight(1f)
+            .clickable { item.post1?.let { post -> onPostClick(post) } }
+        )
+        PostImage(imageUrl = item.post2?.postImage, modifier = Modifier
+            .weight(1f)
+            .clickable { item.post2?.let { post -> onPostClick(post) } }
+        )
+        PostImage(imageUrl = item.post3?.postImage, modifier = Modifier
+            .weight(1f)
+            .clickable { item.post3?.let { post -> onPostClick(post) } }
+        )
+    }
+}
+
+@Composable
+fun PostImage(imageUrl: String?, modifier: Modifier) {
+    Box(modifier = modifier) {
+        var modifier = Modifier
+            .padding(1.dp)
+            .fillMaxWidth()
+        if (imageUrl == null) {
+            modifier = modifier.clickable(enabled = false) { }
+        }
+        CommomImage(data = imageUrl, modifier = modifier, contentScale = ContentScale.Crop)
+    }
 }
