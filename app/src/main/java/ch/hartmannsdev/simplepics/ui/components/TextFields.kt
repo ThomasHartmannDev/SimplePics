@@ -2,15 +2,22 @@ package ch.hartmannsdev.simplepics.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -29,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -137,4 +145,37 @@ fun EditTextField(label: String, value: String, onValueChange: (String) -> Unit)
                 }
         )
     }
+}
+
+@Composable
+fun SearchBar(searchTerm: String, onSearchChange: (String) -> Unit, onSearch: () -> Unit) {
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = searchTerm,
+        onValueChange = onSearchChange,
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .border(1.dp, Color.Gray, CircleShape),
+        shape = CircleShape,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Search
+        ),
+        keyboardActions = KeyboardActions(onSearch = {
+            onSearch()
+            focusManager.clearFocus()
+        }),
+        maxLines = 1,
+        singleLine = true,
+        trailingIcon = {
+            IconButton(onClick = {
+                onSearch()
+                focusManager.clearFocus()
+            }) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+            }
+        }
+    )
+
 }

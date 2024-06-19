@@ -7,6 +7,7 @@ import android.provider.MediaStore
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import ch.hartmannsdev.simplepics.data.CommentData
 import ch.hartmannsdev.simplepics.data.Event
 import ch.hartmannsdev.simplepics.data.PostData
 import ch.hartmannsdev.simplepics.data.UserData
@@ -21,9 +22,9 @@ import java.util.UUID
 import javax.inject.Inject
 
 /* Constants */
-var USERS = "users"
-var POSTS = "posts"
-
+const val USERS = "users"
+const val POSTS = "posts"
+const val COMMENTS = "comments"
 
 /**
  * ViewModel for managing user authentication, profile data, and posts in a simple picture sharing app.
@@ -78,6 +79,17 @@ class SimplePicsViewModel @Inject constructor(
      * Holds the list of posts for the current user.
      */
     val posts = mutableStateOf<List<PostData>>(listOf())
+
+    val searchedPosts = mutableStateOf<List<PostData>>(listOf())
+    val searchedPostProgress = mutableStateOf(false)
+
+    val postsFeed = mutableStateOf<List<PostData>>(listOf())
+    val postsFeedProgress = mutableStateOf(false)
+
+    val comments = mutableStateOf<List<CommentData>>(listOf())
+    val commentsProgress = mutableStateOf(false)
+
+    val followers = mutableStateOf(0)
 
     /**
      * Initializes the ViewModel and checks the current user's authentication status.
@@ -226,6 +238,7 @@ class SimplePicsViewModel @Inject constructor(
                 signedIn.value = true
                 inProgress.value = false
                 refreshPosts()
+                getPersonalizedFeed()
             }
             .addOnFailureListener { exc ->
                 handleException(exc, "Cannot get user data")
@@ -365,6 +378,10 @@ class SimplePicsViewModel @Inject constructor(
         auth.signOut()
         signedIn.value = false
         userData.value = null
+        searchedPosts.value = listOf()
+        snackbarMessage.value = Event("Logout")
+        postsFeed.value = listOf()
+        comments.value = listOf()
     }
 
     /**
@@ -387,7 +404,7 @@ class SimplePicsViewModel @Inject constructor(
      * @param description The description of the post.
      * @param onPostSuccess A callback function to be invoked on successful post creation.
      */
-    private fun onCreatePost(imageUri: Uri, description: String? = null, onPostSuccess: () -> Unit) {
+    private fun onCreatePost(imageUri: Uri, description: String = "", onPostSuccess: () -> Unit) {
         inProgress.value = true
         val currentUid = auth.currentUser?.uid
         val currentUsername = userData.value?.username
@@ -399,15 +416,36 @@ class SimplePicsViewModel @Inject constructor(
             inProgress.value = false
         } else {
             val postUuid = UUID.randomUUID().toString()
+
+            val fillerWords = listOf(
+                "the", "be", "to", "of", "and", "a", "in", "that", "have", "I",
+                "it", "for", "not", "on", "with", "he", "as", "you", "do", "at",
+                "this", "but", "his", "by", "from", "they", "we", "say", "her",
+                "she", "or", "an", "will", "my", "one", "all", "would", "there",
+                "their", "what", "so", "up", "out", "if", "about", "who", "get",
+                "which", "go", "me", "when", "make", "can", "like", "time", "no",
+                "just", "him", "know", "take", "person", "into", "year", "your",
+                "good", "some", "could", "them", "see", "other", "than", "then",
+                "now", "look", "only", "come", "its", "over", "think", "also",
+                "back", "after", "use", "two", "how", "our", "work", "first",
+                "well", "way", "even", "new", "want", "because", "any", "these",
+                "give", "day", "most", "us"
+            )
+            val searchTerms = description
+                .split(" ", ".", ",", "?", "!", "-", "_", "#")
+                .map { it.lowercase() }
+                .filter { it.isNotEmpty() }
+
             val post = PostData(
-                postUuid,
-                currentUid,
-                currentUsername,
-                currentUserImageUrl,
-                imageUri.toString(),
-                description,
-                System.currentTimeMillis(),
-                listOf<String>()
+                postId = postUuid,
+                userId = currentUid,
+                username = currentUsername,
+                userImage = currentUserImageUrl,
+                postImage = imageUri.toString(),
+                postDescription = description,
+                time = System.currentTimeMillis(),
+                likes = listOf<String>(),
+                searchTerms = searchTerms
             )
 
             db.collection(POSTS).document(postUuid).set(post)
@@ -460,4 +498,146 @@ class SimplePicsViewModel @Inject constructor(
         val sortedPosts = newPosts.sortedByDescending { it.time }
         outState.value = sortedPosts
     }
+
+    fun searchPosts(searchTerm: String){
+        if(searchTerm.isNotEmpty()){
+            searchedPostProgress.value = true
+            db.collection(POSTS)
+                .whereArrayContains("searchTerms", searchTerm.trim().lowercase()).get()
+                .addOnSuccessListener {
+                    convertPosts(it, searchedPosts)
+                    searchedPostProgress.value = false
+                }
+                .addOnFailureListener{ exc ->
+                    handleException(exc, "Cannot fetch Posts")
+                    searchedPostProgress.value = false
+                }
+        }
+    }
+
+    fun onFollowClick(userId: String){
+        auth.currentUser?.uid?.let { currentUser ->
+            val following = arrayListOf<String>()
+            userData.value?.following?.let{
+                following.addAll(it)
+            }
+            if(following.contains(userId)){
+                following.remove(userId)
+            }else{
+                following.add(userId)
+            }
+            db.collection(USERS).document(currentUser).update("following", following)
+                    .addOnSuccessListener {
+                        getUserData(currentUser)
+                    }
+        }
+
+    }
+
+    private fun getPersonalizedFeed(){
+
+        val following = userData.value?.following
+        if(!following.isNullOrEmpty()){
+            postsFeedProgress.value = true
+            db.collection(POSTS).whereIn("userId", following).get()
+                .addOnSuccessListener {posts ->
+                    convertPosts(documents = posts, outState = postsFeed)
+                    if(postsFeed.value.isEmpty()){
+                        getGeneralFeed()
+                    } else {
+                        postsFeedProgress.value = false
+                    }
+                }
+                .addOnFailureListener { exc ->
+                    handleException(exc, "Cannot fetch Posts")
+                    postsFeedProgress.value = false
+                }
+        } else {
+            getGeneralFeed()
+        }
+    }
+
+    private fun getGeneralFeed() {
+        postsFeedProgress.value = true
+        val currentTime = System.currentTimeMillis()
+        val difference = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+        db.collection(POSTS).whereGreaterThan("time", currentTime - difference).get()
+            .addOnSuccessListener {
+                convertPosts(it, postsFeed)
+                postsFeedProgress.value = false
+            }
+            .addOnFailureListener { exc ->
+                handleException(exc, "Cannot fetch Posts")
+                postsFeedProgress.value = false
+            }
+    }
+
+    fun onLikePost(postData: PostData){
+        auth.currentUser?.uid?.let {userId ->
+            postData.likes?.let {likes ->
+                val newLikes = arrayListOf<String>()
+                if(likes.contains(userId)){
+                    newLikes.addAll(likes.filter { userId != it })
+                } else {
+                    newLikes.addAll(likes)
+                    newLikes.add(userId)
+                }
+                postData.postId?.let {postId ->
+                    db.collection(POSTS).document(postId).update("likes", newLikes)
+                        .addOnSuccessListener {
+                            postData.likes = newLikes
+                        }
+                }
+            }
+        }
+    }
+
+    fun createComment(postId: String, text: String){
+        userData.value?.username?.let { username ->
+            val commentId = UUID.randomUUID().toString()
+            val comment = CommentData(
+                commentId = commentId,
+                postId = postId,
+                username = username,
+                text = text,
+                timestamp = System.currentTimeMillis()
+            )
+            db.collection(COMMENTS).document(commentId).set(comment)
+                .addOnSuccessListener {
+                    getComments(postId)
+                }
+                .addOnFailureListener {
+                    handleException(it, "Cannot create comment")
+                }
+        }
+    }
+
+    fun getComments(postId: String?) {
+        commentsProgress.value = true
+        db.collection(COMMENTS).whereEqualTo("postId", postId).get()
+            .addOnSuccessListener { documents ->
+                val newComments = mutableListOf<CommentData>()
+                documents.forEach { doc ->
+                    val comment = doc.toObject<CommentData>()
+                    newComments.add(comment)
+                }
+                val sortedComments = newComments.sortedByDescending { it.timestamp }
+                comments.value = sortedComments
+                commentsProgress.value = false
+            }
+            .addOnFailureListener { exc ->
+                handleException(exc, "Cannot retrieve comments")
+                commentsProgress.value = false
+            }
+    }
+
+    private fun getFollowers(uid: String?) {
+        db.collection(USERS).whereArrayContains("following", uid?:"").get()
+            .addOnSuccessListener { documents ->
+                followers.value = documents.size()
+            }
+    }
+
 }
+
+

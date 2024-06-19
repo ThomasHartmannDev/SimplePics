@@ -20,4 +20,9 @@ sealed class Router(val route: String) {
             return "singlepost/${Uri.encode(Gson().toJson(postData))}"
         }
     }
+    object CommentsScreen : Router("commentscreen/{postId}") {
+        fun createRoute(postId: String): String {
+            return "commentscreen/$postId}"
+        }
+    }
 }

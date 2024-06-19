@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -96,46 +97,49 @@ fun ProfileContent(
     val scrollState = rememberScrollState()
     val imageUrl = vm.userData?.value?.imageUrl
 
-    Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(text = "Back", modifier = Modifier.clickable { onBack.invoke() })
-            Text(text = "Save", modifier = Modifier.clickable { onSave.invoke() })
-        }
-        CommomDivider()
+   Scaffold {
+       Column(
+           modifier = Modifier
+               .verticalScroll(scrollState)
+               .padding(it)
+               .padding(16.dp)
+       ) {
+           Row(
+               modifier = Modifier
+                   .fillMaxWidth()
+                   .padding(8.dp),
+               horizontalArrangement = Arrangement.SpaceBetween,
+           ) {
+               Text(text = "Back", modifier = Modifier.clickable { onBack.invoke() })
+               Text(text = "Save", modifier = Modifier.clickable { onSave.invoke() })
+           }
+           CommomDivider()
 
-        //User Image
-        ProfileImage(imageURL = imageUrl, vm)
+           //User Image
+           ProfileImage(imageURL = imageUrl, vm)
 
-        CommomDivider()
+           CommomDivider()
 
-        Spacer(modifier = Modifier.height(16.dp))
+           Spacer(modifier = Modifier.height(16.dp))
 
-        EditTextField(label = "Name", value = name, onValueChange = onNameChange)
-        CommomDivider()
-        EditTextField(label = "Username", value = userName, onValueChange = onUserNameChange)
-        CommomDivider()
-        EditTextField(label = "Bio", value = bio, onValueChange = onBioChange)
-        CommomDivider()
+           EditTextField(label = "Name", value = name, onValueChange = onNameChange)
+           CommomDivider()
+           EditTextField(label = "Username", value = userName, onValueChange = onUserNameChange)
+           CommomDivider()
+           EditTextField(label = "Bio", value = bio, onValueChange = onBioChange)
+           CommomDivider()
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(text = "Logout", modifier = Modifier.clickable { onLogout.invoke() })
-        }
-        Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
-    }
+           Row(
+               modifier = Modifier
+                   .fillMaxWidth()
+                   .padding(top = 16.dp, bottom = 16.dp),
+               horizontalArrangement = Arrangement.Center
+           ) {
+               Text(text = "Logout", modifier = Modifier.clickable { onLogout.invoke() })
+           }
+           Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
+       }
+   }
 }
 
 @Composable

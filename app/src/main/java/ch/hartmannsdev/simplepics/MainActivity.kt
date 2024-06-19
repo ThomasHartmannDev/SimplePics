@@ -18,6 +18,7 @@ import ch.hartmannsdev.simplepics.data.PostData
 import ch.hartmannsdev.simplepics.ui.screens.auth.ForgotPasswordScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.LoginScreen
 import ch.hartmannsdev.simplepics.ui.screens.auth.SignupScreen
+import ch.hartmannsdev.simplepics.ui.screens.feed.CommentScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.FeedScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.SearchScreen
 import ch.hartmannsdev.simplepics.ui.screens.feed.SinglePostScreen
@@ -70,11 +71,17 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
         ) { navBackStackEntry ->
             val postDataJson = navBackStackEntry.arguments?.getString("postData")
             val postData = Gson().fromJson(postDataJson, PostData::class.java)
-
             postData?.let {
                 SinglePostScreen(
                     vm = vm, navController = navController, post = it
                 )
+            }
+        }
+
+        composable(Router.CommentsScreen.route){navBackStackEntry ->
+            val postId = navBackStackEntry.arguments?.getString("postId")
+            postId?.let {
+                CommentScreen(navController = navController, vm = vm, postId = it)
             }
         }
 

@@ -2,6 +2,7 @@ package ch.hartmannsdev.simplepics.ui.screens.feed
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,55 +16,76 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
+import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.data.PostData
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.CommomDivider
 import ch.hartmannsdev.simplepics.utils.CommomImage
+import ch.hartmannsdev.simplepics.utils.LikeAnimation
 import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.delay
 
 @Composable
 fun SinglePostScreen(navController: NavController, vm: SimplePicsViewModel, post: PostData) {
+
+    val comments = vm.comments.value
+
+    LaunchedEffect (key1 = Unit){
+        vm.getComments(post.postId)
+    }
+
     val scrollState = rememberScrollState()
     post.userId?.let {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp)
-                .verticalScroll(state = scrollState)
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+        Scaffold {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(it)
+                    .verticalScroll(state = scrollState)
+            ) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+                CommomDivider()
+
+                SinglePostDisplay(navController, vm, post, comments.size)
             }
-
-            CommomDivider()
-
-            SinglePostDisplay(navController, vm, post)
         }
     }
 }
 
 @Composable
-fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, post: PostData) {
+fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, post: PostData, nbComments: Int = 0) {
 
     val userData = vm.userData.value
-    //User infos
+    val likeAnimation = remember { mutableStateOf(false) }
+    val dislikeAnimation = remember { mutableStateOf(false) }
+    val likes = remember { mutableStateOf(post.likes?.size ?: 0) }
+    val userHasLiked = remember { mutableStateOf(post.likes?.contains(userData?.userId) == true) }
+
+    // User infos
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -84,14 +106,22 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
                 }
             }
             Text(text = post.username ?: "")
-            Text(text = " . ", modifier = Modifier.padding(8.dp))
+            Text(text = " ", modifier = Modifier.padding(8.dp))
 
             if (userData?.userId == post.userId) {
                 // Current user post, Don't show anything
-            } else {
-                Text(text = "Follow", color = Color.Blue,
+            } else if (userData?.following?.contains(post.userId) == true) {
+                Text(
+                    text = "Following", color = Color.Gray,
                     modifier = Modifier.clickable {
-                        //Follow User
+                        vm.onFollowClick(post.userId!!)
+                    }
+                )
+            } else {
+                Text(
+                    text = "Follow", color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        vm.onFollowClick(post.userId!!)
                     }
                 )
             }
@@ -99,7 +129,25 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
     }
     CommomDivider()
 
-    Box(modifier = Modifier) {
+    Box(
+        modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        if (userHasLiked.value) {
+                            dislikeAnimation.value = true
+                            likes.value -= 1
+                        } else {
+                            likeAnimation.value = true
+                            likes.value += 1
+                        }
+                        userHasLiked.value = !userHasLiked.value
+                        vm.onLikePost(post)
+                    }
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
         val modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 150.dp)
@@ -108,6 +156,22 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
             modifier = modifier,
             contentScale = ContentScale.FillWidth
         )
+
+        if (likeAnimation.value) {
+            LikeAnimation(like = true)
+            LaunchedEffect(likeAnimation.value) {
+                delay(1000)
+                likeAnimation.value = false
+            }
+        }
+
+        if (dislikeAnimation.value) {
+            LikeAnimation(like = false)
+            LaunchedEffect(dislikeAnimation.value) {
+                delay(1000)
+                dislikeAnimation.value = false
+            }
+        }
     }
     CommomDivider()
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -115,31 +179,27 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
             painter = painterResource(id = R.drawable.ic_like),
             contentDescription = "Like",
             modifier = Modifier.size(24.dp),
-            colorFilter = ColorFilter.tint(Color.Red)
+            colorFilter = ColorFilter.tint(Color.Red),
         )
-        Text(text = " ${post.likes?.size ?: 0} Likes", modifier = Modifier.padding(start = 0.dp))
+        Text(text = " ${likes.value} Likes", modifier = Modifier.padding(start = 0.dp))
     }
 
-    Column (modifier = Modifier.padding(8.dp)){
+    Column(modifier = Modifier.padding(8.dp)) {
         Text(text = post.username ?: "", fontWeight = FontWeight.Bold)
         Text(text = post.postDescription ?: "", modifier = Modifier.padding(start = 8.dp))
     }
 
     CommomDivider()
-    Row (modifier = Modifier.padding(8.dp)){
-        Text(text = "View Comments", color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
+    Row(modifier = Modifier.padding(8.dp)) {
+        Text(text = "View ${nbComments} Comments",
+            color = Color.Gray,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .clickable {
+                    post.postId?.let {
+                        navController.navigate(Router.CommentsScreen.createRoute(it))
+                    }
+                }
+        )
     }
-    Row (modifier = Modifier.padding(8.dp)){
-        Text(text = "View Comments", color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
-    }
-     Row (modifier = Modifier.padding(8.dp)){
-            Text(text = "View Comments", color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
-        }
-     Row (modifier = Modifier.padding(8.dp)){
-            Text(text = "View Comments", color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
-        }
-     Row (modifier = Modifier.padding(8.dp)){
-            Text(text = "View Comments", color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
-        }
-
 }
