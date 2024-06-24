@@ -35,6 +35,13 @@ import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 
+/**
+ * Composable function for the comment screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing comments.
+ * @param postId The ID of the post to which comments belong.
+ */
 @Composable
 fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId: String) {
     var commentText by rememberSaveable { mutableStateOf("") }
@@ -52,6 +59,7 @@ fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId:
                         .padding(8.dp)
                         .navigationBarsWithImePadding()
                 ) {
+                    // Text field for entering comments
                     TextField(
                         value = commentText,
                         onValueChange = { commentText = it },
@@ -59,6 +67,7 @@ fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId:
                             .weight(1f)
                             .border(1.dp, Color.LightGray),
                     )
+                    // Button to submit the comment
                     Button(
                         onClick = {
                             vm.createComment(postId = postId, text = commentText)
@@ -77,12 +86,13 @@ fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId:
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                Row (horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically){
-
+                // Back button
+                Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
+                // Display progress spinner while loading comments
                 if (commentsProgress) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -92,6 +102,7 @@ fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId:
                         CommomProgressSpinner()
                     }
                 } else if (comments.isEmpty()) {
+                    // Display message if there are no comments
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.Center,
@@ -100,6 +111,7 @@ fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId:
                         Text(text = "No comments available")
                     }
                 } else {
+                    // Display list of comments
                     LazyColumn(modifier = Modifier.weight(1f)) {
                         items(items = comments) { comment ->
                             CommentRow(comment)
@@ -111,6 +123,11 @@ fun CommentScreen(navController: NavController, vm: SimplePicsViewModel, postId:
     }
 }
 
+/**
+ * Composable function for displaying a single comment row.
+ *
+ * @param comment The comment data to display.
+ */
 @Composable
 fun CommentRow(comment: CommentData) {
     Row(
@@ -118,7 +135,9 @@ fun CommentRow(comment: CommentData) {
             .fillMaxWidth()
             .padding(8.dp)
     ) {
+        // Display username in bold
         Text(text = comment.username ?: "", fontWeight = FontWeight.Bold)
+        // Display comment text
         Text(text = comment.text ?: "", modifier = Modifier.padding(start = 8.dp))
     }
 }

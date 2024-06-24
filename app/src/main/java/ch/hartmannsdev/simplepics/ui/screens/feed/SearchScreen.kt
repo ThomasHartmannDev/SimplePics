@@ -21,26 +21,38 @@ import ch.hartmannsdev.simplepics.ui.components.SearchBar
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import com.google.gson.Gson
 
-
+/**
+ * Composable function for the search screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing search functionality.
+ */
 @Composable
 fun SearchScreen(navController: NavController, vm: SimplePicsViewModel) {
     val searchedPostLoading = vm.searchedPostProgress.value
     val searchedPost = vm.searchedPosts.value
     var searchTerm by rememberSaveable { mutableStateOf("") }
 
-    Scaffold (
+    Scaffold(
         bottomBar = {
             BottomNavigationMenu(
                 selectedItem = BottomNavigationItem.SEARCH,
                 navController = navController
             )
         }
-    ){
-        Column(modifier = Modifier.fillMaxSize().padding(it)) {
-            SearchBar(searchTerm,
-                onSearchChange = {searchTerm = it},
-                onSearch = {vm.searchPosts(searchTerm)}
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            // Search bar for inputting search term
+            SearchBar(
+                searchTerm = searchTerm,
+                onSearchChange = { searchTerm = it },
+                onSearch = { vm.searchPosts(searchTerm) }
             )
+            // Display the list of posts matching the search term
             PostList(
                 isContextLoading = false,
                 postsLoading = searchedPostLoading,

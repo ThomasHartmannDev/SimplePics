@@ -20,11 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -57,6 +53,12 @@ import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import kotlinx.coroutines.launch
 
+/**
+ * Composable function for the Forgot Password screen.
+ *
+ * @param vm The ViewModel for managing authentication.
+ * @param navController The navigation controller for navigating between screens.
+ */
 @Composable
 fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) {
 
@@ -69,6 +71,11 @@ fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) 
     val isLoading = vm.inProgress.value
     val context = LocalContext.current
 
+    /**
+     * Gets the position of the Snackbar based on the keyboard visibility.
+     *
+     * @return The position of the Snackbar.
+     */
     fun getSnackbarPosition(): Float {
         val insets = ViewCompat.getRootWindowInsets(view)
         val isKeyboardVisible = insets?.isVisible(WindowInsetsCompat.Type.ime()) == true
@@ -106,6 +113,7 @@ fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) 
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Logo image
             Image(
                 painter = painterResource(id = R.drawable.simplepiclogo_name),
                 contentDescription = "SimplePics Logo",
@@ -115,6 +123,7 @@ fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) 
                     .padding(8.dp)
             )
 
+            // Title text
             Text(
                 text = "Forgot Password?",
                 style = Typography.headlineLarge + (TextStyle(fontWeight = FontWeight.Bold)),
@@ -123,8 +132,10 @@ fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) 
 
             Spacer(modifier = Modifier.padding(8.dp))
 
+            // Instruction text
             Text("Enter your email to reset your password")
 
+            // Email input field
             OutlinedTextField(
                 value = emailState.value,
                 onValueChange = { emailState.value = it },
@@ -137,7 +148,8 @@ fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) 
             )
 
             Spacer(modifier = Modifier.padding(16.dp))
-            //TODO -> MAKE SURE THE USER USE A SECURE PASSWORD!
+
+            // Send button
             FilledButton(text = "Send", onClick = {
                 val email = emailState.value.text
 
@@ -155,6 +167,7 @@ fun ForgotPasswordScreen(vm: SimplePicsViewModel, navController: NavController) 
                 }
             })
 
+            // Space for bottom inset
             Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
         if (isLoading) {

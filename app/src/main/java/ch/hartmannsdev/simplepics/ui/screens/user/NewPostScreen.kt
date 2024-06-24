@@ -43,14 +43,25 @@ import ch.hartmannsdev.simplepics.utils.CommomImage
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import coil.compose.rememberImagePainter
 
-
+/**
+ * Composable function for the new post screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing new post data.
+ * @param encodedUri The encoded URI of the image to be posted.
+ */
 @Composable
 fun NewPostScreen(navController: NavController, vm: SimplePicsViewModel, encodedUri: String?) {
 
+    // State to manage the description of the post
     val onDescriptionChange = remember { mutableStateOf(TextFieldValue()) }
+    // State to manage the image URI
     val imageUri by remember { mutableStateOf(encodedUri) }
+    // State to manage scroll position
     val scrollState = rememberScrollState()
+    // Manages the focus of the input fields
     val focusManager = LocalFocusManager.current
+    // Checks if there is an operation in progress
     val inProgress = vm.inProgress.value
 
     Scaffold { innerPadding ->
@@ -61,6 +72,7 @@ fun NewPostScreen(navController: NavController, vm: SimplePicsViewModel, encoded
                 .verticalScroll(scrollState)
 
         ) {
+            // Row for back button and post button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,10 +80,12 @@ fun NewPostScreen(navController: NavController, vm: SimplePicsViewModel, encoded
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Back button
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
 
+                // Post button
                 Text(text = "Post",
                     style = Typography.bodyLarge,
                     modifier = Modifier
@@ -85,6 +99,7 @@ fun NewPostScreen(navController: NavController, vm: SimplePicsViewModel, encoded
             }
             CommomDivider()
 
+            // Image to be posted
             Image(
                 painter = rememberImagePainter(data = imageUri),
                 contentDescription = null,
@@ -93,9 +108,9 @@ fun NewPostScreen(navController: NavController, vm: SimplePicsViewModel, encoded
                     .defaultMinSize(minHeight = 240.dp)
             )
 
-
             CommomDivider()
 
+            // Text field for post description
             Row(modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)) {
                 OutlinedTextField(
                     value = onDescriptionChange.value,
@@ -109,8 +124,8 @@ fun NewPostScreen(navController: NavController, vm: SimplePicsViewModel, encoded
             }
         }
     }
+    // Show progress spinner if an operation is in progress
     if (inProgress) {
         CommomProgressSpinner()
     }
 }
-

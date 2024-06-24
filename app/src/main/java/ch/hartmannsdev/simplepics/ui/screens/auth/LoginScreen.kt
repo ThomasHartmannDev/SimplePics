@@ -1,6 +1,7 @@
 package ch.hartmannsdev.simplepics.ui.screens.auth
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
 import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.components.FilledButton
+import ch.hartmannsdev.simplepics.ui.theme.Orange05
 import ch.hartmannsdev.simplepics.ui.theme.PurpleDark02
 import ch.hartmannsdev.simplepics.ui.theme.Typography
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
@@ -60,10 +62,16 @@ import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import ch.hartmannsdev.simplepics.utils.navigateTo
 import kotlinx.coroutines.launch
 
+/**
+ * Composable function for the Login screen.
+ *
+ * @param vm The ViewModel for managing authentication.
+ * @param navController The navigation controller for navigating between screens.
+ */
 @Composable
 fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
-    //Before everything Check if the user is already logged in so we don't waste time on login
-    CheckSignedIn(navControler = navController, vm = vm)
+    // Before everything, check if the user is already logged in to avoid unnecessary login attempts
+    CheckSignedIn(navController = navController, vm = vm)
 
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
@@ -75,6 +83,11 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
     val focus = LocalFocusManager.current
     val isLoading = vm.inProgress.value
 
+    /**
+     * Gets the position of the Snackbar based on the keyboard visibility.
+     *
+     * @return The position of the Snackbar.
+     */
     fun getSnackbarPosition(): Float {
         val insets = ViewCompat.getRootWindowInsets(view)
         val isKeyboardVisible = insets?.isVisible(WindowInsetsCompat.Type.ime()) == true
@@ -112,6 +125,7 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Logo image
             Image(
                 painter = painterResource(id = R.drawable.simplepiclogo_name),
                 contentDescription = "SimplePics Logo",
@@ -121,12 +135,14 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                     .padding(8.dp)
             )
 
+            // Title text
             Text(
                 text = "Login",
                 style = Typography.headlineLarge + (TextStyle(fontWeight = FontWeight.Bold)),
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
+            // Email input field
             OutlinedTextField(
                 value = emailState.value,
                 onValueChange = { emailState.value = it },
@@ -138,6 +154,7 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                 singleLine = true,
             )
 
+            // Password input field
             OutlinedTextField(
                 value = passwordState.value,
                 onValueChange = { passwordState.value = it },
@@ -153,7 +170,6 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                     IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
                         val icon = if (passwordVisible.value) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                         val description = if (passwordVisible.value) "Hide password" else "Show password"
-                        //Icon(Icons.Filled.Favorite, contentDescription = "Localized description")
                         Icon(icon, contentDescription = description )
                     }
                 },
@@ -162,50 +178,58 @@ fun LoginScreen(vm: SimplePicsViewModel, navController: NavController) {
                     .padding(top = 8.dp, end = 24.dp, start = 24.dp),
                 singleLine = true,
             )
-            Row (modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp, end = 24.dp),
-                horizontalArrangement = Arrangement.End){
+
+            // Forgot Password link
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp, end = 24.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
                 Text("Forgot Password?",
                     style = Typography.bodyLarge + (TextStyle(fontWeight = FontWeight.Bold)),
-                    color = PurpleDark02,
-                    modifier = Modifier
-                        .clickable { navigateTo(navController, Router.ForgotPassword) },
+                    color = Orange05,
+                    modifier = Modifier.clickable { navigateTo(navController, Router.ForgotPassword) },
                 )
             }
 
             Spacer(modifier = Modifier.padding(16.dp))
 
-            FilledButton(text = "Login", onClick = {
-                val email = emailState.value.text
-                val password = passwordState.value.text
+            // Login button
+            FilledButton(
+                text = "Login",
+                onClick = {
+                    val email = emailState.value.text
+                    val password = passwordState.value.text
 
-                when {
-                    email.isEmpty() -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Email cannot be empty")
+                    when {
+                        email.isEmpty() -> {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Email cannot be empty")
+                            }
                         }
-                    }
-                    password.isEmpty() -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Password cannot be empty")
+                        password.isEmpty() -> {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Password cannot be empty")
+                            }
                         }
-                    }
-
-                    else -> {
-                        focus.clearFocus(force = true)
-                        vm.onLogin(email, password)
+                        else -> {
+                            focus.clearFocus(force = true)
+                            vm.onLogin(email, password)
+                        }
                     }
                 }
-            })
+            )
 
+            // Navigation to Signup screen
             Text("Don't have an account? Sign up",
-                color = PurpleDark02,
+                color = Orange05,
                 modifier = Modifier
                     .padding(16.dp)
                     .clickable { navigateTo(navController, Router.Signup) }
             )
 
+            // Space for bottom inset
             Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
         if (isLoading) {

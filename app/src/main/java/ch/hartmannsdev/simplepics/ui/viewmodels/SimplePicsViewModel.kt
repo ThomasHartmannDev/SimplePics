@@ -80,15 +80,39 @@ class SimplePicsViewModel @Inject constructor(
      */
     val posts = mutableStateOf<List<PostData>>(listOf())
 
+    /**
+     * Holds the list of searched posts.
+     */
     val searchedPosts = mutableStateOf<List<PostData>>(listOf())
+
+    /**
+     * Represents whether the searched posts operation is in progress.
+     */
     val searchedPostProgress = mutableStateOf(false)
 
+    /**
+     * Holds the list of posts for the feed.
+     */
     val postsFeed = mutableStateOf<List<PostData>>(listOf())
+
+    /**
+     * Represents whether the posts feed operation is in progress.
+     */
     val postsFeedProgress = mutableStateOf(false)
 
+    /**
+     * Holds the list of comments.
+     */
     val comments = mutableStateOf<List<CommentData>>(listOf())
+
+    /**
+     * Represents whether the comments retrieval operation is in progress.
+     */
     val commentsProgress = mutableStateOf(false)
 
+    /**
+     * Holds the number of followers.
+     */
     val followers = mutableStateOf(0)
 
     /**
@@ -341,6 +365,7 @@ class SimplePicsViewModel @Inject constructor(
             updatePostUserImageData(it.toString())
         }
     }
+
     /**
      * Uploads a profile image for every single post.
      *
@@ -499,6 +524,11 @@ class SimplePicsViewModel @Inject constructor(
         outState.value = sortedPosts
     }
 
+    /**
+     * Searches for posts containing the given search term.
+     *
+     * @param searchTerm The search term to use.
+     */
     fun searchPosts(searchTerm: String){
         if(searchTerm.isNotEmpty()){
             searchedPostProgress.value = true
@@ -515,6 +545,11 @@ class SimplePicsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles the follow/unfollow action for a user.
+     *
+     * @param userId The ID of the user to follow/unfollow.
+     */
     fun onFollowClick(userId: String){
         auth.currentUser?.uid?.let { currentUser ->
             val following = arrayListOf<String>()
@@ -527,15 +562,19 @@ class SimplePicsViewModel @Inject constructor(
                 following.add(userId)
             }
             db.collection(USERS).document(currentUser).update("following", following)
-                    .addOnSuccessListener {
-                        getUserData(currentUser)
-                    }
+                .addOnSuccessListener {
+                    getUserData(currentUser)
+                }
         }
 
     }
 
-    private fun getPersonalizedFeed(){
+    /**
+     * Retrieves a personalized feed
 
+    based on the users followed by the current user.
+     */
+    private fun getPersonalizedFeed(){
         val following = userData.value?.following
         if(!following.isNullOrEmpty()){
             postsFeedProgress.value = true
@@ -557,10 +596,13 @@ class SimplePicsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a general feed of posts.
+     */
     private fun getGeneralFeed() {
         postsFeedProgress.value = true
         val currentTime = System.currentTimeMillis()
-        val difference = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+        val difference = 24 * 60 * 60 * 1000 * 7 // 24 hours in milliseconds * 7 = 1 week
         db.collection(POSTS).whereGreaterThan("time", currentTime - difference).get()
             .addOnSuccessListener {
                 convertPosts(it, postsFeed)
@@ -572,6 +614,11 @@ class SimplePicsViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Handles the like/unlike action for a post.
+     *
+     * @param postData The post data to like/unlike.
+     */
     fun onLikePost(postData: PostData){
         auth.currentUser?.uid?.let {userId ->
             postData.likes?.let {likes ->
@@ -592,6 +639,12 @@ class SimplePicsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Creates a new comment for a post.
+     *
+     * @param postId The ID of the post to comment on.
+     * @param text The text of the comment.
+     */
     fun createComment(postId: String, text: String){
         userData.value?.username?.let { username ->
             val commentId = UUID.randomUUID().toString()
@@ -612,6 +665,11 @@ class SimplePicsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves comments for a post.
+     *
+     * @param postId The ID of the post to retrieve comments for.
+     */
     fun getComments(postId: String?) {
         commentsProgress.value = true
         db.collection(COMMENTS).whereEqualTo("postId", postId).get()
@@ -631,13 +689,15 @@ class SimplePicsViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Retrieves the number of followers for a user.
+     *
+     * @param uid The user ID to retrieve followers for.
+     */
     private fun getFollowers(uid: String?) {
         db.collection(USERS).whereArrayContains("following", uid?:"").get()
             .addOnSuccessListener { documents ->
                 followers.value = documents.size()
             }
     }
-
 }
-
-

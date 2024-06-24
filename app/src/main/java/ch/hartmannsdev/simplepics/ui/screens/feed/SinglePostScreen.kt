@@ -46,12 +46,20 @@ import ch.hartmannsdev.simplepics.utils.LikeAnimation
 import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
 
+/**
+ * Composable function for displaying a single post screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing post data.
+ * @param post The post data to display.
+ */
 @Composable
 fun SinglePostScreen(navController: NavController, vm: SimplePicsViewModel, post: PostData) {
 
     val comments = vm.comments.value
 
-    LaunchedEffect (key1 = Unit){
+    // Load comments when the composable is launched
+    LaunchedEffect(key1 = Unit) {
         vm.getComments(post.postId)
     }
 
@@ -65,17 +73,27 @@ fun SinglePostScreen(navController: NavController, vm: SimplePicsViewModel, post
                     .padding(it)
                     .verticalScroll(state = scrollState)
             ) {
+                // Back button
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
                 CommomDivider()
 
+                // Display the post content
                 SinglePostDisplay(navController, vm, post, comments.size)
             }
         }
     }
 }
 
+/**
+ * Composable function for displaying the content of a single post.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing post data.
+ * @param post The post data to display.
+ * @param nbComments The number of comments on the post.
+ */
 @Composable
 fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, post: PostData, nbComments: Int = 0) {
 
@@ -85,13 +103,14 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
     val likes = remember { mutableStateOf(post.likes?.size ?: 0) }
     val userHasLiked = remember { mutableStateOf(post.likes?.contains(userData?.userId) == true) }
 
-    // User infos
+    // User info section
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // User profile image
             Card(
                 shape = CircleShape, modifier = Modifier
                     .padding(8.dp)
@@ -108,6 +127,7 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
             Text(text = post.username ?: "")
             Text(text = " ", modifier = Modifier.padding(8.dp))
 
+            // Follow/Unfollow button
             if (userData?.userId == post.userId) {
                 // Current user post, Don't show anything
             } else if (userData?.following?.contains(post.userId) == true) {
@@ -129,6 +149,7 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
     }
     CommomDivider()
 
+    // Post image with like/dislike animation
     Box(
         modifier = Modifier
             .pointerInput(Unit) {
@@ -174,6 +195,8 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
         }
     }
     CommomDivider()
+
+    // Like count
     Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
         Image(
             painter = painterResource(id = R.drawable.ic_like),
@@ -184,12 +207,15 @@ fun SinglePostDisplay(navController: NavController, vm: SimplePicsViewModel, pos
         Text(text = " ${likes.value} Likes", modifier = Modifier.padding(start = 0.dp))
     }
 
+    // Post description
     Column(modifier = Modifier.padding(8.dp)) {
         Text(text = post.username ?: "", fontWeight = FontWeight.Bold)
         Text(text = post.postDescription ?: "", modifier = Modifier.padding(start = 8.dp))
     }
 
     CommomDivider()
+
+    // View comments section
     Row(modifier = Modifier.padding(8.dp)) {
         Text(text = "View ${nbComments} Comments",
             color = Color.Gray,

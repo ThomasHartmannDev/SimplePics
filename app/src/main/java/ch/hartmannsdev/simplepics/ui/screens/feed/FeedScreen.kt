@@ -43,6 +43,12 @@ import ch.hartmannsdev.simplepics.utils.UserImageCard
 import com.google.gson.Gson
 import kotlinx.coroutines.delay
 
+/**
+ * Composable function for the feed screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing feed data.
+ */
 @Composable
 fun FeedScreen(navController: NavController, vm: SimplePicsViewModel) {
     val userDataLoading = vm.inProgress.value
@@ -64,6 +70,7 @@ fun FeedScreen(navController: NavController, vm: SimplePicsViewModel) {
                 .padding(it)
                 .background(Color.LightGray)
         ) {
+            // User information row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -74,6 +81,7 @@ fun FeedScreen(navController: NavController, vm: SimplePicsViewModel) {
                 Text(text = userData?.username ?: "", modifier = Modifier.padding(8.dp))
             }
 
+            // List of posts in the feed
             PostsList(
                 modifier = Modifier.weight(1f),
                 posts = feed,
@@ -86,6 +94,16 @@ fun FeedScreen(navController: NavController, vm: SimplePicsViewModel) {
     }
 }
 
+/**
+ * Composable function for displaying a list of posts.
+ *
+ * @param posts The list of posts to display.
+ * @param modifier The modifier to be applied to the component.
+ * @param loading Indicates if the posts are loading.
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing post data.
+ * @param currentUserId The ID of the current user.
+ */
 @Composable
 fun PostsList(
     posts: List<PostData>,
@@ -114,6 +132,14 @@ fun PostsList(
     }
 }
 
+/**
+ * Composable function for displaying a single post.
+ *
+ * @param post The post data to display.
+ * @param currentUserId The ID of the current user.
+ * @param vm The ViewModel for managing post data.
+ * @param onPostClick Callback for when the post is clicked.
+ */
 @Composable
 fun Post(
     post: PostData,
@@ -132,19 +158,23 @@ fun Post(
             .padding(top = 4.dp, bottom = 4.dp)
     ) {
         Column {
+            // User info row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Card(shape = CircleShape, modifier = Modifier
-                    .padding(4.dp)
-                    .size(32.dp)) {
+                Card(
+                    shape = CircleShape, modifier = Modifier
+                        .padding(4.dp)
+                        .size(32.dp)
+                ) {
                     CommomImage(data = post.userImage, contentScale = ContentScale.Crop)
                 }
                 Text(text = post.username ?: "", modifier = Modifier.padding(4.dp))
             }
+            // Post image with like/dislike animations
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 val modifier = Modifier
                     .fillMaxWidth()

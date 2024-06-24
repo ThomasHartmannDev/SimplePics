@@ -53,6 +53,12 @@ import ch.hartmannsdev.simplepics.utils.navigateTo
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
+/**
+ * Composable function for the My Posts screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing user posts and profile data.
+ */
 @Composable
 fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
     val userData = vm.userData.value
@@ -60,13 +66,14 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
     val postLoading = vm.refreshPostsProgress.value
     val posts = vm.posts.value
     val showDialog = remember { mutableStateOf(false) }
-    val ErrorCam = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val view = LocalView.current
     val followers = vm.followers.value
+
+    // Function to get the position of the snackbar
     fun getSnackbarPosition(): Float {
         val insets = ViewCompat.getRootWindowInsets(view)
         val isKeyboardVisible = insets?.isVisible(WindowInsetsCompat.Type.ime()) == true
@@ -79,6 +86,7 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
         }
     }
 
+    // Launcher for selecting a new post image from gallery
     val newPostImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -99,6 +107,7 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
         }
     }
 
+    // Launcher for selecting an image from gallery
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -109,11 +118,11 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
         }
     }
 
+    // Launcher for taking a picture with the camera
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
         if (success) {
-            // CHANGE HERE TO USE CAMERA IMAGE
             vm.cameraImageUri?.let { uri: Uri? ->
                 uri?.let {
                     val encodedUri = Uri.encode(it.toString())
@@ -124,6 +133,7 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
         }
     }
 
+    // Dialog for choosing the image source (Gallery or Camera)
     if (showDialog.value) {
         Dialog(onDismissRequest = {
             showDialog.value = false
@@ -198,7 +208,9 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
             }
         } }
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(it)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(it)) {
             Column(modifier = Modifier.weight(1f)) {
                 Row() {
                     ch.hartmannsdev.simplepics.ui.components.ProfileImage(userData?.imageUrl) {
@@ -259,18 +271,14 @@ fun MyPostScreen(navController: NavController, vm: SimplePicsViewModel) {
                         .weight(1f)
                         .padding(1.dp)
                         .fillMaxWidth(),
-                ) {
-                        post ->
+                ) { post ->
                     val postDataJson = Uri.encode(Gson().toJson(post))
                     navController.navigate("singlepost/$postDataJson")
                 }
-
             }
-
         }
         if (isLoading) {
             CommomProgressSpinner()
         }
     }
-
 }

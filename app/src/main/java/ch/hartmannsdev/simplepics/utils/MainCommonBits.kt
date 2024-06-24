@@ -85,12 +85,12 @@ fun navigateTo(navControler: NavController, dest: Router, vararg params: NavPara
 }
 
 @Composable
-fun CheckSignedIn(navControler: NavController, vm: SimplePicsViewModel) {
+fun CheckSignedIn(navController: NavController, vm: SimplePicsViewModel) {
     val alreadyLoggedIn = remember { mutableStateOf(false) }
     val signedIn = vm.signedIn.value
     if (signedIn && !alreadyLoggedIn.value) {
         alreadyLoggedIn.value = true
-        navControler.navigate(Router.Feed.route) {
+        navController.navigate(Router.Feed.route) {
             // Pop all the screens from the backstack, so if the user presses the back button,
             // they will not be able to get back and will leave the app
             popUpTo(0)

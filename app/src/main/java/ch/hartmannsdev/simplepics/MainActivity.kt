@@ -31,11 +31,15 @@ import ch.hartmannsdev.simplepics.utils.NotificationMessage
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Main activity for the SimplePics application. This activity sets up the UI and navigation
+ * for the app using Jetpack Compose and Hilt for dependency injection.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge() // Enables edge-to-edge display
         setContent {
             SimplePicsTheme {
                 SimplePicsApp()
@@ -44,13 +48,18 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Main composable function for the SimplePics application. Sets up the navigation and theme.
+ *
+ * @param modifier Modifier for the composable.
+ */
 @Composable
 fun SimplePicsApp(modifier: Modifier = Modifier) {
-    val vm = hiltViewModel<SimplePicsViewModel>()
-    val navController = rememberNavController()
-    NotificationMessage(vm = vm)
+    val vm = hiltViewModel<SimplePicsViewModel>() // ViewModel for the app, injected by Hilt
+    val navController = rememberNavController() // Controller for navigation
+    NotificationMessage(vm = vm) // Displays notifications
 
-    // Here are created every single route we need to change screens on our app
+    // Sets up the navigation graph
     NavHost(navController = navController, startDestination = Router.Login.route) {
         composable(Router.Signup.route){ SignupScreen(navController = navController, vm = vm) }
         composable(Router.Login.route){ LoginScreen(navController = navController, vm = vm) }
@@ -62,7 +71,7 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
         composable(Router.NewPost.route){navBackStackEntry ->
             val imageUri = navBackStackEntry.arguments?.getString("imageUri")
             imageUri?.let {
-               NewPostScreen(navController = navController, vm = vm,  encodedUri = it)
+                NewPostScreen(navController = navController, vm = vm,  encodedUri = it)
             }
         }
         composable(
@@ -86,11 +95,12 @@ fun SimplePicsApp(modifier: Modifier = Modifier) {
         }
 
     }
-
 }
 
-
-
+/**
+ * Preview composable function for the SimplePicsApp.
+ * This function is used to preview the app's UI in Android Studio.
+ */
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {

@@ -52,6 +52,7 @@ import androidx.navigation.NavController
 import ch.hartmannsdev.simplepics.R
 import ch.hartmannsdev.simplepics.Router.Router
 import ch.hartmannsdev.simplepics.ui.components.FilledButton
+import ch.hartmannsdev.simplepics.ui.theme.Orange05
 import ch.hartmannsdev.simplepics.ui.theme.PurpleDark02
 import ch.hartmannsdev.simplepics.ui.theme.Typography
 import ch.hartmannsdev.simplepics.ui.viewmodels.SimplePicsViewModel
@@ -60,35 +61,55 @@ import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import ch.hartmannsdev.simplepics.utils.navigateTo
 import kotlinx.coroutines.launch
 
+/**
+ * Validates if the email address is valid.
+ *
+ * @param email The email address to validate.
+ * @return True if the email address is valid, false otherwise.
+ */
 fun isEmailValid(email: String): Boolean {
     return email.contains("@")
 }
 
+/**
+ * Validates if the password is valid.
+ *
+ * @param password The password to validate.
+ * @return True if the password is valid, false otherwise.
+ */
 fun isPasswordValid(password: String): Boolean {
     val passwordPattern = Regex("^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&+=]).{8,}\$")
     return passwordPattern.containsMatchIn(password)
 }
 
-// SignupScreen
-
+/**
+ * Composable function for the Signup screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing authentication.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
-    //Checking if the user is already signed in
-    CheckSignedIn(navControler = navController, vm = vm)
+    // Checking if the user is already signed in
+    CheckSignedIn(navController = navController, vm = vm)
 
     val usernameState = remember { mutableStateOf(TextFieldValue()) }
     val emailState = remember { mutableStateOf(TextFieldValue()) }
     val passwordState = remember { mutableStateOf(TextFieldValue()) }
     val confirmPasswordState = remember { mutableStateOf(TextFieldValue()) }
     val passwordVisible = remember { mutableStateOf(false) }
-    //val confirmPasswordVisible = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val view = LocalView.current
     val density = LocalDensity.current
     val isLoading = vm.inProgress.value
 
+    /**
+     * Gets the position of the Snackbar based on the keyboard visibility.
+     *
+     * @return The position of the Snackbar.
+     */
     fun getSnackbarPosition(): Float {
         val insets = ViewCompat.getRootWindowInsets(view)
         val isKeyboardVisible = insets?.isVisible(WindowInsetsCompat.Type.ime()) == true
@@ -100,6 +121,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
             0f
         }
     }
+
     // Observe Snackbar messages
     val snackbarMessage = vm.snackbarMessage.value?.getContentOrNull()
     LaunchedEffect(snackbarMessage) {
@@ -140,9 +162,10 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
+            // Username input field
             OutlinedTextField(
                 value = usernameState.value,
-                onValueChange = {usernameState.value = it.copy(text = it.text.replace(" ", "")) },
+                onValueChange = { usernameState.value = it.copy(text = it.text.replace(" ", "")) },
                 label = { Text("Username") },
                 leadingIcon = {
                     Icon(
@@ -156,6 +179,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 singleLine = true,
             )
 
+            // Email input field
             OutlinedTextField(
                 value = emailState.value,
                 onValueChange = { emailState.value = it.copy(text = it.text.replace(" ", "")) }, // Remove spaces
@@ -167,6 +191,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 singleLine = true,
             )
 
+            // Password input field
             OutlinedTextField(
                 value = passwordState.value,
                 onValueChange = { passwordState.value = it },
@@ -183,7 +208,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                         val icon = if (passwordVisible.value) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                         val description = if (passwordVisible.value) "Hide password" else "Show password"
 
-                        Icon(icon, contentDescription = description )
+                        Icon(icon, contentDescription = description)
                     }
                 },
                 modifier = Modifier
@@ -192,12 +217,11 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                 singleLine = true,
             )
 
+            // Confirm password input field
             OutlinedTextField(
                 value = confirmPasswordState.value,
                 onValueChange = { confirmPasswordState.value = it },
-                label = { Row {
-                    Text("Confirm Password")
-                } },
+                label = { Row { Text("Confirm Password") } },
                 leadingIcon = {
                     Icon(
                         Icons.Default.Password,
@@ -212,6 +236,7 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
             )
             Spacer(modifier = Modifier.padding(16.dp))
 
+            // Sign up button
             FilledButton(text = "Sign up", onClick = {
                 val username = usernameState.value.text
                 val email = emailState.value.text
@@ -242,26 +267,25 @@ fun SignupScreen(navController: NavController, vm: SimplePicsViewModel) {
                     }
                     else -> {
                         scope.launch {
-                            //snackbarHostState.showSnackbar("Signup successful")
                             vm.onSignUp(username, email, password)
                         }
-
                     }
                 }
             })
 
+            // Navigation to login screen
             Text("Already a user? Sign in",
-                color = PurpleDark02,
+                color = Orange05,
                 modifier = Modifier
                     .padding(16.dp)
                     .clickable { navigateTo(navController, Router.Login) }
             )
 
+            // Space for bottom inset
             Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
         }
-        if(isLoading){
+        if (isLoading) {
             CommomProgressSpinner()
         }
     }
 }
-

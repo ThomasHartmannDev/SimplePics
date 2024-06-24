@@ -46,6 +46,15 @@ import ch.hartmannsdev.simplepics.ui.theme.Green10
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Custom TextField composable used for various input fields with a label, keyboard options, and optional trailing icon.
+ *
+ * @param valueState The state of the text field value.
+ * @param label The label to be displayed for the text field.
+ * @param keyboardOptions The keyboard options for the text field.
+ * @param visualTransformation The visual transformation for the text field.
+ * @param trailingIcon An optional trailing icon to be displayed in the text field.
+ */
 @Composable
 fun CustomTextField(
     valueState: MutableState<String>,
@@ -80,6 +89,11 @@ fun CustomTextField(
     )
 }
 
+/**
+ * Composable function for creating a text field for entering a name.
+ *
+ * @param nameState The state of the name text field value.
+ */
 @Composable
 fun NameTextField(nameState: MutableState<String>) {
     CustomTextField(
@@ -88,6 +102,11 @@ fun NameTextField(nameState: MutableState<String>) {
     )
 }
 
+/**
+ * Composable function for creating a text field for entering an email.
+ *
+ * @param emailState The state of the email text field value.
+ */
 @Composable
 fun EmailTextField(emailState: MutableState<String>) {
     CustomTextField(
@@ -97,6 +116,12 @@ fun EmailTextField(emailState: MutableState<String>) {
     )
 }
 
+/**
+ * Composable function for creating a text field for entering a password.
+ *
+ * @param passwordState The state of the password text field value.
+ * @param label The label to be displayed for the password text field.
+ */
 @Composable
 fun PasswordTextField(passwordState: MutableState<String>, label: String = "Password") {
     var passwordVisible by remember { mutableStateOf(false) }
@@ -116,6 +141,13 @@ fun PasswordTextField(passwordState: MutableState<String>, label: String = "Pass
     )
 }
 
+/**
+ * Composable function for creating an editable text field with a label.
+ *
+ * @param label The label to be displayed above the text field.
+ * @param value The current value of the text field.
+ * @param onValueChange The callback to be invoked when the value of the text field changes.
+ */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditTextField(label: String, value: String, onValueChange: (String) -> Unit) {
@@ -147,6 +179,13 @@ fun EditTextField(label: String, value: String, onValueChange: (String) -> Unit)
     }
 }
 
+/**
+ * Composable function for creating a search bar with a text field and a search button.
+ *
+ * @param searchTerm The current search term.
+ * @param onSearchChange The callback to be invoked when the search term changes.
+ * @param onSearch The callback to be invoked when the search button is clicked.
+ */
 @Composable
 fun SearchBar(searchTerm: String, onSearchChange: (String) -> Unit, onSearch: () -> Unit) {
     val focusManager = LocalFocusManager.current
@@ -177,5 +216,4 @@ fun SearchBar(searchTerm: String, onSearchChange: (String) -> Unit, onSearch: ()
             }
         }
     )
-
 }

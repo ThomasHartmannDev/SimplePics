@@ -21,7 +21,15 @@ import ch.hartmannsdev.simplepics.data.PostRow
 import ch.hartmannsdev.simplepics.utils.CommomImage
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 
-
+/**
+ * Composable function to display a list of posts.
+ *
+ * @param isContextLoading Boolean indicating if the context is loading.
+ * @param postsLoading Boolean indicating if the posts are loading.
+ * @param posts List of PostData to be displayed.
+ * @param modifier Modifier for customizing the layout.
+ * @param onPostClick Callback to be invoked when a post is clicked.
+ */
 @Composable
 fun PostList(
     isContextLoading: Boolean,
@@ -59,9 +67,14 @@ fun PostList(
             }
         }
     }
-
 }
 
+/**
+ * Composable function to display a row of posts.
+ *
+ * @param item PostRow containing posts to be displayed in the row.
+ * @param onPostClick Callback to be invoked when a post is clicked.
+ */
 @Composable
 fun PostsRow(item: PostRow, onPostClick: (PostData) -> Unit) {
     Row(
@@ -84,6 +97,12 @@ fun PostsRow(item: PostRow, onPostClick: (PostData) -> Unit) {
     }
 }
 
+/**
+ * Composable function to display an image of a post.
+ *
+ * @param imageUrl URL of the image to be displayed.
+ * @param modifier Modifier for customizing the layout.
+ */
 @Composable
 fun PostImage(imageUrl: String?, modifier: Modifier) {
     Box(modifier = modifier) {

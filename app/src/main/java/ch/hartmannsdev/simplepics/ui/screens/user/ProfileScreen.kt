@@ -50,6 +50,12 @@ import ch.hartmannsdev.simplepics.utils.CommomImage
 import ch.hartmannsdev.simplepics.utils.CommomProgressSpinner
 import ch.hartmannsdev.simplepics.utils.navigateTo
 
+/**
+ * Composable function for the profile screen.
+ *
+ * @param navController The navigation controller for navigating between screens.
+ * @param vm The ViewModel for managing profile data.
+ */
 @Composable
 fun ProfileScreen(navController: NavController, vm: SimplePicsViewModel) {
     val isLoading = vm.inProgress.value
@@ -80,6 +86,21 @@ fun ProfileScreen(navController: NavController, vm: SimplePicsViewModel) {
         )
     }
 }
+
+/**
+ * Composable function for displaying profile content.
+ *
+ * @param vm The ViewModel for managing profile data.
+ * @param name The name of the user.
+ * @param userName The username of the user.
+ * @param bio The bio of the user.
+ * @param onNameChange Callback for name change.
+ * @param onUserNameChange Callback for username change.
+ * @param onBioChange Callback for bio change.
+ * @param onSave Callback for saving the profile data.
+ * @param onBack Callback for navigating back.
+ * @param onLogout Callback for logging out.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileContent(
@@ -97,51 +118,58 @@ fun ProfileContent(
     val scrollState = rememberScrollState()
     val imageUrl = vm.userData?.value?.imageUrl
 
-   Scaffold {
-       Column(
-           modifier = Modifier
-               .verticalScroll(scrollState)
-               .padding(it)
-               .padding(16.dp)
-       ) {
-           Row(
-               modifier = Modifier
-                   .fillMaxWidth()
-                   .padding(8.dp),
-               horizontalArrangement = Arrangement.SpaceBetween,
-           ) {
-               Text(text = "Back", modifier = Modifier.clickable { onBack.invoke() })
-               Text(text = "Save", modifier = Modifier.clickable { onSave.invoke() })
-           }
-           CommomDivider()
+    Scaffold {
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(it)
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = "Back", modifier = Modifier.clickable { onBack.invoke() })
+                Text(text = "Save", modifier = Modifier.clickable { onSave.invoke() })
+            }
+            CommomDivider()
 
-           //User Image
-           ProfileImage(imageURL = imageUrl, vm)
+            // User Image
+            ProfileImage(imageURL = imageUrl, vm)
 
-           CommomDivider()
+            CommomDivider()
 
-           Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-           EditTextField(label = "Name", value = name, onValueChange = onNameChange)
-           CommomDivider()
-           EditTextField(label = "Username", value = userName, onValueChange = onUserNameChange)
-           CommomDivider()
-           EditTextField(label = "Bio", value = bio, onValueChange = onBioChange)
-           CommomDivider()
+            // Edit fields for name, username, and bio
+            EditTextField(label = "Name", value = name, onValueChange = onNameChange)
+            CommomDivider()
+            EditTextField(label = "Username", value = userName, onValueChange = onUserNameChange)
+            CommomDivider()
+            EditTextField(label = "Bio", value = bio, onValueChange = onBioChange)
+            CommomDivider()
 
-           Row(
-               modifier = Modifier
-                   .fillMaxWidth()
-                   .padding(top = 16.dp, bottom = 16.dp),
-               horizontalArrangement = Arrangement.Center
-           ) {
-               Text(text = "Logout", modifier = Modifier.clickable { onLogout.invoke() })
-           }
-           Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
-       }
-   }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = "Logout", modifier = Modifier.clickable { onLogout.invoke() })
+            }
+            Box(modifier = Modifier.windowInsetsBottomHeight(WindowInsets.ime))
+        }
+    }
 }
 
+/**
+ * Composable function for displaying and changing the profile image.
+ *
+ * @param imageURL The URL of the profile image.
+ * @param vm The ViewModel for managing profile data.
+ */
 @Composable
 fun ProfileImage(imageURL: String?, vm: SimplePicsViewModel) {
     val isLoading = vm.inProgress.value
@@ -214,27 +242,26 @@ fun ProfileImage(imageURL: String?, vm: SimplePicsViewModel) {
     }
 
     Box(modifier = Modifier.height(IntrinsicSize.Min)) {
-
-        Column(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .clickable { showDialog.value = true },
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .clickable { showDialog.value = true },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(shape = CircleShape,
+            Card(
+                shape = CircleShape,
                 modifier = Modifier
                     .padding(8.dp)
-                    .size(100.dp),
-            ){
+                    .size(100.dp)
+            ) {
                 CommomImage(data = imageURL)
             }
             Text(text = "Change profile picture")
         }
 
-
         if (isLoading) {
             CommomProgressSpinner()
         }
-
     }
 }
