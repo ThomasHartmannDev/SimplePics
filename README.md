@@ -1,4 +1,4 @@
-![SimplePics Logo](SimplePics/app/src/main/res/drawable/simplepiclogo_name.png)
+![SimplePics Logo](SimplePics/blob/master/app/src/main/res/drawable/simplepiclogo_name.png)
 ## SimplePics App
 
 SimplePics is a simple picture-sharing application built with Android's Jetpack Compose and Firebase. Users can sign up, log in, post pictures, follow other users, like posts, and comment on posts.
